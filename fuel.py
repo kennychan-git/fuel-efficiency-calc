@@ -36,6 +36,7 @@ root = ThemedTk(theme="arc")  # Replace 'arc' with your desired theme
 root.title("Fuel Efficiency Converter")
 # Create a custom font
 custom_font = ("Helvetica", 12)
+custom_font2 = ("Helvetica",14)
 
 # Create a style for the Frame
 style = ttk.Style()
@@ -62,23 +63,20 @@ for i in range(9):
 # For example, change the following line:
 # entry_x.grid(row=1, column=0, sticky=(tk.W), padx=5, pady=5)
 # to:
-ttk.Label(mainframe, text="Liters:", font=custom_font, foreground="blue", background="white").grid(row=0, column=0, sticky=(tk.N, tk.S, tk.E, tk.W), padx=5, pady=5)
+ttk.Label(mainframe, text="Liters:", font=custom_font, foreground="blue", background="white").grid(row=0, column=0, sticky=(tk.E), padx=5, pady=5)
 entry_liters = ttk.Entry(mainframe, width=7, font=custom_font)
 entry_liters.grid(row=0, column=1, padx=5, pady=5)
 
-#ttk.Label(mainframe, text="Liters:").grid(row=0, column=0, sticky=(tk.E), padx=5)
-#entry_liters = ttk.Entry(mainframe, width=7)
-#entry_liters.grid(row=0, column=1, padx=5)
 
-ttk.Label(mainframe, text="Kilometers:",font=custom_font, foreground="blue", background="white").grid(row=1, column=0, sticky=(tk.N, tk.S, tk.E, tk.W), padx=5)
+ttk.Label(mainframe, text="Kilometers:",font=custom_font, foreground="blue", background="white").grid(row=1, column=0, sticky=(tk.E), padx=5)
 entry_km = ttk.Entry(mainframe, width=7)
 entry_km.grid(row=1, column=1, padx=5)
 
-ttk.Label(mainframe, text="Fuel price (RM/L):",font=custom_font, foreground="blue", background="white").grid(row=2, column=0, sticky=(tk.N, tk.S, tk.E, tk.W), padx=5)
+ttk.Label(mainframe, text="Fuel price (RM/L):",font=custom_font, foreground="blue", background="white").grid(row=2, column=0, sticky=(tk.E), padx=5)
 entry_fuel_price = ttk.Entry(mainframe, width=7)
 entry_fuel_price.grid(row=2, column=1, padx=5)
 
-ttk.Label(mainframe, text="Pump price (RM):",font=custom_font, foreground="blue", background="white").grid(row=3, column=0, sticky=(tk.N, tk.S, tk.E, tk.W), padx=5)
+ttk.Label(mainframe, text="Pump price (RM):",font=custom_font, foreground="blue", background="white").grid(row=3, column=0, sticky=(tk.E), padx=5)
 entry_pump_price = ttk.Entry(mainframe, width=7)
 entry_pump_price.grid(row=3, column=1, padx=5)
 
@@ -86,31 +84,31 @@ calculate_button = ttk.Button(mainframe, text="Calculate", command=calculate_eff
 calculate_button.grid(row=4, column=0, columnspan=4, pady=10)
 
 result_liters_var = tk.StringVar()
-result_liters_label = ttk.Label(mainframe, textvariable=result_liters_var)
+result_liters_label = ttk.Label(mainframe, textvariable=result_liters_var,font=custom_font2)
 result_liters_label.grid(row=5, column=0, columnspan=4)
 
 result_km_var = tk.StringVar()
-result_km_label = ttk.Label(mainframe, textvariable=result_km_var)
+result_km_label = ttk.Label(mainframe, textvariable=result_km_var,font=custom_font2)
 result_km_label.grid(row=6, column=0, columnspan=4)
 
 result_fuel_price_var = tk.StringVar()
-result_fuel_price_label = ttk.Label(mainframe, textvariable=result_fuel_price_var)
+result_fuel_price_label = ttk.Label(mainframe, textvariable=result_fuel_price_var,font=custom_font2)
 result_fuel_price_label.grid(row=7, column=0, columnspan=4)
 
 result_pump_price_var = tk.StringVar()
-result_pump_price_label = ttk.Label(mainframe, textvariable=result_pump_price_var)
+result_pump_price_label = ttk.Label(mainframe, textvariable=result_pump_price_var,font=custom_font2)
 result_pump_price_label.grid(row=8, column=0, columnspan=4)
 
 result_l_100km_var = tk.StringVar()
-result_l_100km_label = ttk.Label(mainframe, textvariable=result_l_100km_var)
+result_l_100km_label = ttk.Label(mainframe, textvariable=result_l_100km_var,font=custom_font2)
 result_l_100km_label.grid(row=9, column=0, columnspan=4)
 
 result_rm_km_var = tk.StringVar()
-result_rm_km_label = ttk.Label(mainframe, textvariable=result_rm_km_var)
+result_rm_km_label = ttk.Label(mainframe, textvariable=result_rm_km_var,font=custom_font2)
 result_rm_km_label.grid(row=10, column=0, columnspan=4)
 
 result_km_l_var = tk.StringVar()
-result_km_l_label = ttk.Label(mainframe, textvariable=result_km_l_var)
+result_km_l_label = ttk.Label(mainframe, textvariable=result_km_l_var,font=custom_font2)
 result_km_l_label.grid(row=11, column=0, columnspan=4)
 
 
