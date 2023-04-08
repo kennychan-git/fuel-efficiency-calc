@@ -2,8 +2,28 @@ import tkinter as tk
 from tkinter import ttk
 from ttkthemes import ThemedTk 
 
+
+def reset():
+    # Clear all the input fields
+    entry_liters.delete(0, 'end')
+    entry_km.delete(0, 'end')
+    entry_fuel_price.delete(0, 'end')
+    entry_pump_price.delete(0, 'end')
+    entry_mpg.delete(0, 'end')
+
+    # Clear all the result fields
+    result_liters_var.set("")
+    result_km_var.set("")
+    result_fuel_price_var.set("")
+    result_pump_price_var.set("")
+    result_l_100km_var.set("")
+    result_rm_km_var.set("")
+    result_km_l_var.set("")
+    result_mpg_var.set("")
+
+
 def calculate_efficiency():
-    mpg = float(mpg_label.get()) if mpg_label.get() else None
+    mpg = float(entry_mpg.get()) if entry_mpg.get() else None
     if mpg:
         km_per_gallon = 1.60934 / 3.78541 * mpg
         liters = 100 / km_per_gallon
@@ -48,6 +68,9 @@ def calculate_efficiency():
         result_l_100km_var.set(f"L/100 km: {result_l_100km:.2f}")
         result_rm_km_var.set(f"RM/km: {result_rm_km:.2f}")
         result_km_l_var.set(f"km/L: {result_km_l:.2f}")
+        result_mpg = (km / 1.60934) / (liters * 0.264172)
+        result_mpg_var.set(f"MPG: {result_mpg:.2f}")
+
 
 
 
@@ -94,48 +117,56 @@ ttk.Label(mainframe, text="Kilometers:",font=custom_font, foreground="blue", bac
 entry_km = ttk.Entry(mainframe, width=7)
 entry_km.grid(row=1, column=1, padx=5)
 
-ttk.Label(mainframe, text="Fuel price (RM/L):",font=custom_font, foreground="blue", background="white").grid(row=2, column=0, sticky=(tk.E), padx=5)
+ttk.Label(mainframe, text="Fuel price (RM or $/L):",font=custom_font, foreground="blue", background="white").grid(row=2, column=0, sticky=(tk.E), padx=5)
 entry_fuel_price = ttk.Entry(mainframe, width=7)
 entry_fuel_price.grid(row=2, column=1, padx=5)
 
-ttk.Label(mainframe, text="Pump price (RM):",font=custom_font, foreground="blue", background="white").grid(row=3, column=0, sticky=(tk.E), padx=5)
+ttk.Label(mainframe, text="Pump price (RM/$):",font=custom_font, foreground="blue", background="white").grid(row=3, column=0, sticky=(tk.E), padx=5)
 entry_pump_price = ttk.Entry(mainframe, width=7)
 entry_pump_price.grid(row=3, column=1, padx=5)
 
 ttk.Label(mainframe, text="MPG :",font=custom_font, foreground="blue", background="white").grid(row=4, column=0, sticky=(tk.E), padx=5)
-mpg_label = ttk.Entry(mainframe, width=7)
-mpg_label.grid(row=4, column=1, padx=5)
+entry_mpg = ttk.Entry(mainframe, width=7)
+entry_mpg.grid(row=4, column=1, padx=5)
 
-calculate_button = ttk.Button(mainframe, text="Calculate", command=calculate_efficiency)
+calculate_button = ttk.Button(mainframe, text="Convert", command=calculate_efficiency)
 calculate_button.grid(row=5, column=0, columnspan=4, pady=10)
+
+calculate_button = ttk.Button(mainframe, text="Reset", command=reset)
+calculate_button.grid(row=6, column=0, columnspan=4, pady=10)
+
+
+result_mpg_var = tk.StringVar()
+result_mpg_label = ttk.Label(mainframe, textvariable=result_mpg_var,font=custom_font2)
+result_mpg_label.grid(row=7, column=0, columnspan=4)
 
 result_liters_var = tk.StringVar()
 result_liters_label = ttk.Label(mainframe, textvariable=result_liters_var,font=custom_font2)
-result_liters_label.grid(row=6, column=0, columnspan=4)
+result_liters_label.grid(row=8, column=0, columnspan=4)
 
 result_km_var = tk.StringVar()
 result_km_label = ttk.Label(mainframe, textvariable=result_km_var,font=custom_font2)
-result_km_label.grid(row=7, column=0, columnspan=4)
+result_km_label.grid(row=9, column=0, columnspan=4)
 
 result_fuel_price_var = tk.StringVar()
 result_fuel_price_label = ttk.Label(mainframe, textvariable=result_fuel_price_var,font=custom_font2)
-result_fuel_price_label.grid(row=8, column=0, columnspan=4)
+result_fuel_price_label.grid(row=10, column=0, columnspan=4)
 
 result_pump_price_var = tk.StringVar()
 result_pump_price_label = ttk.Label(mainframe, textvariable=result_pump_price_var,font=custom_font2)
-result_pump_price_label.grid(row=9, column=0, columnspan=4)
+result_pump_price_label.grid(row=11, column=0, columnspan=4)
 
 result_l_100km_var = tk.StringVar()
 result_l_100km_label = ttk.Label(mainframe, textvariable=result_l_100km_var,font=custom_font2)
-result_l_100km_label.grid(row=10, column=0, columnspan=4)
+result_l_100km_label.grid(row=12, column=0, columnspan=4)
 
 result_rm_km_var = tk.StringVar()
 result_rm_km_label = ttk.Label(mainframe, textvariable=result_rm_km_var,font=custom_font2)
-result_rm_km_label.grid(row=11, column=0, columnspan=4)
+result_rm_km_label.grid(row=13, column=0, columnspan=4)
 
 result_km_l_var = tk.StringVar()
 result_km_l_label = ttk.Label(mainframe, textvariable=result_km_l_var,font=custom_font2)
-result_km_l_label.grid(row=12, column=0, columnspan=4)
+result_km_l_label.grid(row=14, column=0, columnspan=4)
 
 
 # Add an image to a Label or Button (optional)
