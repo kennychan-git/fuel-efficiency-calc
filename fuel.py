@@ -2,7 +2,9 @@ import tkinter as tk
 from tkinter import ttk
 from ttkthemes import ThemedTk 
 
-
+######################################################
+#                      RESET BUTTON ACTIONS CLEAR EVERYTHING 
+######################################################
 def reset():
     # Clear all the input fields
     entry_liters.delete(0, 'end')
@@ -21,6 +23,10 @@ def reset():
     result_km_l_var.set("")
     result_mpg_var.set("")
 
+
+######################################################
+#                      CALCULATION FOR METRIC AND IMPERIAL 
+######################################################
 
 def calculate_efficiency():
     mpg = float(entry_mpg.get()) if entry_mpg.get() else None
@@ -108,46 +114,51 @@ for i in range(9):
 # For example, change the following line:
 # entry_x.grid(row=1, column=0, sticky=(tk.W), padx=5, pady=5)
 # to:
+######################################################
+#                      INITIATE DISPLAYS FOR INPUTS AND BUTTONS
+######################################################
+for sohairow2 in range (0,1):
+    ttk.Label(mainframe, text="Liters or Gallons:", font=custom_font, foreground="blue", background="white").grid(row=0, column=0, sticky=(tk.E), padx=5, pady=5)
+    entry_liters = ttk.Entry(mainframe, width=7, font=custom_font)
+    entry_liters.grid(row=sohairow2, column=1, padx=5, pady=5)
+    sohairow2 +=1
+    
+    ttk.Label(mainframe, text="Kilometers or Miles:",font=custom_font, foreground="blue", background="white").grid(row=1, column=0, sticky=(tk.E), padx=5)
+    entry_km = ttk.Entry(mainframe, width=7)
+    entry_km.grid(row=sohairow2, column=1, padx=5)
+    sohairow2 +=1
+    ttk.Label(mainframe, text="Fuel price (RM or $/L):",font=custom_font, foreground="blue", background="white").grid(row=2, column=0, sticky=(tk.E), padx=5)
+    entry_fuel_price = ttk.Entry(mainframe, width=7)
+    entry_fuel_price.grid(row=sohairow2, column=1, padx=5)
+    sohairow2 +=1
+    ttk.Label(mainframe, text="Pump price (RM or $):",font=custom_font, foreground="blue", background="white").grid(row=3, column=0, sticky=(tk.E), padx=5)
+    entry_pump_price = ttk.Entry(mainframe, width=7)
+    entry_pump_price.grid(row=sohairow2, column=1, padx=5)
+    sohairow2 +=1
+    ttk.Label(mainframe, text="MPG :",font=custom_font, foreground="blue", background="white").grid(row=4, column=0, sticky=(tk.E), padx=5)
+    entry_mpg = ttk.Entry(mainframe, width=7)
+    entry_mpg.grid(row=sohairow2, column=1, padx=5)
+    sohairow2 +=1
+    
+    # create a custom font
+    custom_font_button = ('Roboto', 12, 'bold')
+    
+    # create a button with the custom font
+    #calculate_button = ttk.Button(mainframe, text="Calculate", font=custom_font)
+    #calculate_button.grid(row=5, column=0, columnspan=4, pady=10)
+    
+    calculate_button = ttk.Button(mainframe, text="Convert", command=calculate_efficiency)
+    calculate_button.grid(row=sohairow2, column=0, columnspan=4, pady=10)
+    sohairow2 +=1
+    
+    reset_button = ttk.Button(mainframe, text="Reset", command=reset)
+    reset_button.grid(row=sohairow2, column=0, columnspan=4, pady=10)
+    sohairow2 +=1
 
-ttk.Label(mainframe, text="Liters or Gallons:", font=custom_font, foreground="blue", background="white").grid(row=0, column=0, sticky=(tk.E), padx=5, pady=5)
-entry_liters = ttk.Entry(mainframe, width=7, font=custom_font)
-entry_liters.grid(row=0, column=1, padx=5, pady=5)
 
-
-ttk.Label(mainframe, text="Kilometers or Miles:",font=custom_font, foreground="blue", background="white").grid(row=1, column=0, sticky=(tk.E), padx=5)
-entry_km = ttk.Entry(mainframe, width=7)
-entry_km.grid(row=1, column=1, padx=5)
-
-ttk.Label(mainframe, text="Fuel price (RM or $/L):",font=custom_font, foreground="blue", background="white").grid(row=2, column=0, sticky=(tk.E), padx=5)
-entry_fuel_price = ttk.Entry(mainframe, width=7)
-entry_fuel_price.grid(row=2, column=1, padx=5)
-
-ttk.Label(mainframe, text="Pump price (RM or $):",font=custom_font, foreground="blue", background="white").grid(row=3, column=0, sticky=(tk.E), padx=5)
-entry_pump_price = ttk.Entry(mainframe, width=7)
-entry_pump_price.grid(row=3, column=1, padx=5)
-
-ttk.Label(mainframe, text="MPG :",font=custom_font, foreground="blue", background="white").grid(row=4, column=0, sticky=(tk.E), padx=5)
-entry_mpg = ttk.Entry(mainframe, width=7)
-entry_mpg.grid(row=4, column=1, padx=5)
-
-
-# create a custom font
-custom_font_button = ('Roboto', 12, 'bold')
-
-# create a button with the custom font
-#calculate_button = ttk.Button(mainframe, text="Calculate", font=custom_font)
-#calculate_button.grid(row=5, column=0, columnspan=4, pady=10)
-
-calculate_button = ttk.Button(mainframe, text="Convert", command=calculate_efficiency)
-calculate_button.grid(row=5, column=0, columnspan=4, pady=10)
-
-
-reset_button = ttk.Button(mainframe, text="Reset", command=reset)
-reset_button.grid(row=6, column=0, columnspan=4, pady=10)
-
-
-
-
+######################################################
+#                      INITIATE DISPLAYS FOR OUTPUTS 
+######################################################
 for sohairow in range (7,8):
     result_mpg_var = tk.StringVar()
     result_mpg_label = ttk.Label(mainframe, textvariable=result_mpg_var,font=custom_font2)
