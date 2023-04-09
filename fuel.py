@@ -87,8 +87,8 @@ root = ThemedTk(theme="arc")  # Replace 'arc' with your desired theme
 root.title("Fuel Efficiency Converter")
 # Create a custom font
 custom_font = ("Roboto", 12)
-custom_font2 = ("Roboto",14)
-
+custom_font2 = ("Roboto",12)
+custom_fontimportant = ("Roboto",16)
 # Create a style for the Frame
 style = ttk.Style()
 style.configure("Custom.TFrame", background="white")
@@ -107,6 +107,14 @@ for i in range(3):
 for i in range(9):
     mainframe.rowconfigure(i, weight=1)
 
+######################################################
+#                      LABELLING FOR TITLE AND HOWTO
+######################################################
+ttk.Label(mainframe, text="Enter MPG only or other metrics", font=custom_font, foreground="blue", background="white").grid(row=0, column=0, columnspan=4, sticky=(tk.N, tk.S, tk.E, tk.W), padx=5, pady=5)
+
+#ttk.Label(mainframe, text="Enter MPG only or other metrics", font=custom_font, foreground="blue", background="white").grid(row=0, column=0, sticky=(tk.E), padx=5, pady=5)
+#entry_liters = ttk.Entry(mainframe, width=7, font=custom_font)
+#entry_liters.grid(row=0, column=1, padx=5, pady=5)
 
 
 # Update grid options for all widgets inside the mainframe
@@ -117,25 +125,25 @@ for i in range(9):
 ######################################################
 #                      INITIATE DISPLAYS FOR INPUTS AND BUTTONS
 ######################################################
-for sohairow2 in range (0,1):
-    ttk.Label(mainframe, text="Liters or Gallons:", font=custom_font, foreground="blue", background="white").grid(row=0, column=0, sticky=(tk.E), padx=5, pady=5)
+for sohairow2 in range (2,3):
+    ttk.Label(mainframe, text="Liters only:", font=custom_font, foreground="blue", background="white").grid(row=sohairow2, column=0, sticky=(tk.E), padx=5, pady=5)
     entry_liters = ttk.Entry(mainframe, width=7, font=custom_font)
     entry_liters.grid(row=sohairow2, column=1, padx=5, pady=5)
     sohairow2 +=1
     
-    ttk.Label(mainframe, text="Kilometers or Miles:",font=custom_font, foreground="blue", background="white").grid(row=1, column=0, sticky=(tk.E), padx=5)
+    ttk.Label(mainframe, text="Kilometers only:",font=custom_font, foreground="blue", background="white").grid(row=sohairow2, column=0, sticky=(tk.E), padx=5)
     entry_km = ttk.Entry(mainframe, width=7)
     entry_km.grid(row=sohairow2, column=1, padx=5)
     sohairow2 +=1
-    ttk.Label(mainframe, text="Fuel price (RM or $/L):",font=custom_font, foreground="blue", background="white").grid(row=2, column=0, sticky=(tk.E), padx=5)
+    ttk.Label(mainframe, text="Fuel price (RM/L):",font=custom_font, foreground="blue", background="white").grid(row=sohairow2, column=0, sticky=(tk.E), padx=5)
     entry_fuel_price = ttk.Entry(mainframe, width=7)
     entry_fuel_price.grid(row=sohairow2, column=1, padx=5)
     sohairow2 +=1
-    ttk.Label(mainframe, text="Pump price (RM or $):",font=custom_font, foreground="blue", background="white").grid(row=3, column=0, sticky=(tk.E), padx=5)
+    ttk.Label(mainframe, text="Pump price (RM):",font=custom_font, foreground="blue", background="white").grid(row=sohairow2, column=0, sticky=(tk.E), padx=5)
     entry_pump_price = ttk.Entry(mainframe, width=7)
     entry_pump_price.grid(row=sohairow2, column=1, padx=5)
     sohairow2 +=1
-    ttk.Label(mainframe, text="MPG :",font=custom_font, foreground="blue", background="white").grid(row=4, column=0, sticky=(tk.E), padx=5)
+    ttk.Label(mainframe, text="MPG :",font=custom_font, foreground="blue", background="white").grid(row=sohairow2, column=0, sticky=(tk.E), padx=5)
     entry_mpg = ttk.Entry(mainframe, width=7)
     entry_mpg.grid(row=sohairow2, column=1, padx=5)
     sohairow2 +=1
@@ -159,9 +167,9 @@ for sohairow2 in range (0,1):
 ######################################################
 #                      INITIATE DISPLAYS FOR OUTPUTS 
 ######################################################
-for sohairow in range (7,8):
+for sohairow in range (9,10):
     result_mpg_var = tk.StringVar()
-    result_mpg_label = ttk.Label(mainframe, textvariable=result_mpg_var,font=custom_font2)
+    result_mpg_label = ttk.Label(mainframe, textvariable=result_mpg_var,font=custom_fontimportant)
     result_mpg_label.grid(row=sohairow, column=0, columnspan=4)
     sohairow +=1
     result_liters_var = tk.StringVar()
@@ -185,11 +193,11 @@ for sohairow in range (7,8):
     result_l_100km_label.grid(row=sohairow, column=0, columnspan=4)
     sohairow +=1
     result_rm_km_var = tk.StringVar()
-    result_rm_km_label = ttk.Label(mainframe, textvariable=result_rm_km_var,font=custom_font2)
+    result_rm_km_label = ttk.Label(mainframe, textvariable=result_rm_km_var,font=custom_fontimportant)
     result_rm_km_label.grid(row=sohairow, column=0, columnspan=4)
     sohairow +=1
     result_km_l_var = tk.StringVar()
-    result_km_l_label = ttk.Label(mainframe, textvariable=result_km_l_var,font=custom_font2)
+    result_km_l_label = ttk.Label(mainframe, textvariable=result_km_l_var,font=custom_fontimportant)
     result_km_l_label.grid(row=sohairow, column=0, columnspan=4)
     
 
