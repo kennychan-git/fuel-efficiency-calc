@@ -7,7 +7,20 @@ from ttkthemes import ThemedTk
 #                      API TO GRAB LATEST OIL PRICES 
 ######################################################
 
-## TBB - to be build
+import re
+import requests
+
+url = "https://ringgitplus.com/en/blog/petrol-credit-card/petrol-price-malaysia-live-updates-ron95-ron97-diesel.html"
+response = requests.get(url)
+content = response.content.decode('utf-8')
+
+match = re.search(r"RON95 : RM(\d+\.\d+) per litre", content)
+if match:
+    fuel_price_api = match.group(1)
+else:
+    print("Price not found")
+
+
 
 
 ######################################################
@@ -18,7 +31,8 @@ def reset():
     entry_liters.delete(0, 'end')
     entry_km.delete(0, 'end')
     ## mask this below because hardcoded RON95 price
-    #entry_fuel_price.delete(0, 'end')
+    entry_fuel_price.delete(0, 'end')
+    entry_fuel_price.insert(0, fuel_price_api)
     entry_pump_price.delete(0, 'end')
     entry_mpg.delete(0, 'end')
 
@@ -65,7 +79,7 @@ def calculate_efficiency():
             km_per_gallon = 1.60934 / 3.78541 * mpg
             liters = 100 / km_per_gallon
             km = 100
-            #fuel_price = float(entry_fuel_price.get()) if entry_fuel_price.get() else None
+            #fuel_price = fuel_price_api
             #pump_price = liters * fuel_price
 
             result_l_100km = (100 * liters) / km
@@ -85,7 +99,7 @@ def calculate_efficiency():
             liters = liters
             km = 100
             # hardcode fuel price to 2.05
-            fuel_price = 2.05
+            fuel_price = float(fuel_price_api)
             #fuel_price = float(entry_fuel_price.get()) if entry_fuel_price.get() else None
             pump_price = float(entry_pump_price.get()) if entry_pump_price.get() else None
 
@@ -116,7 +130,7 @@ def calculate_efficiency():
             liters = float(entry_liters.get()) if entry_liters.get() else None
             km = float(entry_km.get()) if entry_km.get() else None
             # hardcode fuel price to 2.05
-            fuel_price = 2.05
+            fuel_price = float(fuel_price_api)
             #fuel_price = float(entry_fuel_price.get()) if entry_fuel_price.get() else None
             pump_price = float(entry_pump_price.get()) if entry_pump_price.get() else None
 
@@ -238,7 +252,7 @@ from datetime import date
 today = date.today().strftime("%d/%m/%Y")
 
 # Define the RON95 price
-ron95_price = 2.05
+ron95_price = float(fuel_price_api)
 
 # Set the label text with the formatted date and RON95 price
 label_text = f"RON95 price @ {ron95_price:.2f} as of {today}"
@@ -272,10 +286,10 @@ for sohairow2 in range (2,3):
     entry_km = ttk.Entry(mainframe, width=7)
     entry_km.grid(row=sohairow2, column=1, padx=5)
     sohairow2 +=1
-    #### HARDCODED RON95 PRICES
+    #### HARDCODED RON95 PRICES - changed to api price
     ttk.Label(mainframe, text="Fuel price (RM/L):",font=custom_font, foreground="blue", background="white").grid(row=sohairow2, column=0, sticky=(tk.E), padx=5)
     entry_fuel_price = ttk.Entry(mainframe, width=7)
-    entry_fuel_price.insert(0, '2.05')
+    entry_fuel_price.insert(0, fuel_price_api)
     entry_fuel_price.grid(row=sohairow2, column=1, padx=5)
     sohairow2 +=1
     ###
