@@ -25,10 +25,80 @@ def reset():
 
 
 ######################################################
+#                      ERROR MESSAGE HANDLING
+######################################################
+import tkinter as tk
+from tkinter import messagebox
+
+def handle_error():
+    # Show error message in a pop-up window
+    messagebox.showerror("Error", "use either MPG or input more parameters for conversion.")
+    
+    reset()
+
+# Create a button to trigger the error
+#error_button = tk.Button(root, text="Input error", command=handle_error)
+#error_button.pack()
+
+
+
+######################################################
 #                      CALCULATION FOR METRIC AND IMPERIAL 
 ######################################################
 
+import tkinter as tk
+from tkinter import ttk, messagebox
+
 def calculate_efficiency():
+    try:
+        mpg = float(entry_mpg.get()) if entry_mpg.get() else None
+        if mpg:
+            km_per_gallon = 1.60934 / 3.78541 * mpg
+            liters = 100 / km_per_gallon
+            km = 100
+
+            result_l_100km = (100 * liters) / km
+            result_km_l = km / liters
+
+            result_liters_var.set(f"Liters: {liters:.2f}")
+            result_km_var.set(f"Kilometers: {km:.2f}")
+            result_l_100km_var.set(f"L/100 km: {result_l_100km:.2f}")
+            result_km_l_var.set(f"km/L: {result_km_l:.2f}")
+        else:
+            liters = float(entry_liters.get()) if entry_liters.get() else None
+            km = float(entry_km.get()) if entry_km.get() else None
+            fuel_price = float(entry_fuel_price.get()) if entry_fuel_price.get() else None
+            pump_price = float(entry_pump_price.get()) if entry_pump_price.get() else None
+
+            if not liters:
+                liters = pump_price / fuel_price
+            if not km:
+                km = (100 * liters) / fuel_price
+            if not fuel_price:
+                fuel_price = pump_price / liters
+            if not pump_price:
+                pump_price = liters * fuel_price
+
+            result_l_100km = (100 * liters) / km
+            result_rm_km = (pump_price) / km
+            result_km_l = km / liters
+
+            result_liters_var.set(f"Liters: {liters:.2f}")
+            result_km_var.set(f"Kilometers: {km:.2f}")
+            result_fuel_price_var.set(f"Fuel price (RM/L): {fuel_price:.2f}")
+            result_pump_price_var.set(f"Pump price (RM): {pump_price:.2f}")
+            result_l_100km_var.set(f"L/100 km: {result_l_100km:.2f}")
+            result_rm_km_var.set(f"RM/km: {result_rm_km:.2f}")
+            result_km_l_var.set(f"km/L: {result_km_l:.2f}")
+            result_mpg = (km / 1.60934) / (liters * 0.264172)
+            result_mpg_var.set(f"MPG: {result_mpg:.2f}")
+    except Exception as e:
+        messagebox.showerror(title="Error", message="Use either MPG or input more parameters for conversion.")
+
+
+
+
+def calculate_efficiency_working():
     mpg = float(entry_mpg.get()) if entry_mpg.get() else None
     if mpg:
         km_per_gallon = 1.60934 / 3.78541 * mpg
@@ -110,7 +180,10 @@ for i in range(9):
 ######################################################
 #                      LABELLING FOR TITLE AND HOWTO
 ######################################################
-ttk.Label(mainframe, text="Enter MPG only or other metrics", font=custom_font, foreground="blue", background="white").grid(row=0, column=0, columnspan=4, sticky=(tk.N, tk.S, tk.E, tk.W), padx=5, pady=5)
+#ttk.Label(mainframe, text="Enter MPG only or other metrics", font=custom_font, foreground="blue", background="white").grid(row=0, column=0, columnspan=4, sticky="NSEW", padx=5, pady=5)
+ttk.Label(mainframe, text="Enter MPG only or other metrics", font=custom_font, foreground="blue", background="white").grid(row=0, column=0, columnspan=4, sticky=(tk.E), padx=5, pady=5)
+
+#ttk.Label(mainframe, text="Enter MPG only or other metrics", font=custom_font, foreground="blue", background="white").grid(row=0, column=0, columnspan=4, sticky=(tk.N, tk.S, tk.E, tk.W), padx=5, pady=5)
 
 #ttk.Label(mainframe, text="Enter MPG only or other metrics", font=custom_font, foreground="blue", background="white").grid(row=0, column=0, sticky=(tk.E), padx=5, pady=5)
 #entry_liters = ttk.Entry(mainframe, width=7, font=custom_font)
