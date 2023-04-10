@@ -157,7 +157,7 @@ def calculate_efficiency():
             result_mpg = (km / 1.60934) / (liters * 0.264172)
             result_mpg_var.set(f"MPG: {result_mpg:.2f}")
     except Exception as e:
-        messagebox.showerror(title="Error", message="Use either MPG and fuel price or input more parameters for conversion.")
+        messagebox.showerror(title="Error", message="Use either MPG or input more parameters for conversion.")
 
 
 
