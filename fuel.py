@@ -2,6 +2,14 @@ import tkinter as tk
 from tkinter import ttk
 from ttkthemes import ThemedTk 
 
+
+######################################################
+#                      API TO GRAB LATEST OIL PRICES 
+######################################################
+
+## TBB - to be build
+
+
 ######################################################
 #                      RESET BUTTON ACTIONS CLEAR EVERYTHING 
 ######################################################
@@ -9,7 +17,8 @@ def reset():
     # Clear all the input fields
     entry_liters.delete(0, 'end')
     entry_km.delete(0, 'end')
-    entry_fuel_price.delete(0, 'end')
+    ## mask this below because hardcoded RON95 price
+    #entry_fuel_price.delete(0, 'end')
     entry_pump_price.delete(0, 'end')
     entry_mpg.delete(0, 'end')
 
@@ -56,18 +65,59 @@ def calculate_efficiency():
             km_per_gallon = 1.60934 / 3.78541 * mpg
             liters = 100 / km_per_gallon
             km = 100
+            #fuel_price = float(entry_fuel_price.get()) if entry_fuel_price.get() else None
+            #pump_price = liters * fuel_price
 
             result_l_100km = (100 * liters) / km
+            #result_rm_km = (pump_price) / km
+            result_km_l = km / liters
+            
+            result_liters_var.set(f"Liters: {liters:.2f}")
+            result_km_var.set(f"Kilometers: {km:.2f}")
+            #result_fuel_price_var.set(f"Fuel price (RM/L): {fuel_price:.2f}")
+            #result_pump_price_var.set(f"Pump price (RM): {pump_price:.2f}")
+            result_l_100km_var.set(f"L/100 km: {result_l_100km:.2f}")
+            #result_rm_km_var.set(f"RM/km: {result_rm_km:.2f}")
+            result_km_l_var.set(f"km/L: {result_km_l:.2f}")
+            
+            ############### 
+            # after get l_100km execute below and display
+            liters = liters
+            km = 100
+            # hardcode fuel price to 2.05
+            fuel_price = 2.05
+            #fuel_price = float(entry_fuel_price.get()) if entry_fuel_price.get() else None
+            pump_price = float(entry_pump_price.get()) if entry_pump_price.get() else None
+
+            if not liters:
+                liters = pump_price / fuel_price
+            if not km:
+                km = (100 * liters) / fuel_price
+            if not fuel_price:
+                fuel_price = pump_price / liters
+            if not pump_price:
+                pump_price = liters * fuel_price
+
+            result_l_100km = (100 * liters) / km
+            result_rm_km = (pump_price) / km
             result_km_l = km / liters
 
             result_liters_var.set(f"Liters: {liters:.2f}")
             result_km_var.set(f"Kilometers: {km:.2f}")
+            result_fuel_price_var.set(f"Fuel price (RM/L): {fuel_price:.2f}")
+            result_pump_price_var.set(f"Pump price (RM): {pump_price:.2f}")
             result_l_100km_var.set(f"L/100 km: {result_l_100km:.2f}")
+            result_rm_km_var.set(f"RM/km: {result_rm_km:.2f}")
             result_km_l_var.set(f"km/L: {result_km_l:.2f}")
+            result_mpg = (km / 1.60934) / (liters * 0.264172)
+            result_mpg_var.set(f"MPG: {result_mpg:.2f}")
+            
         else:
             liters = float(entry_liters.get()) if entry_liters.get() else None
             km = float(entry_km.get()) if entry_km.get() else None
-            fuel_price = float(entry_fuel_price.get()) if entry_fuel_price.get() else None
+            # hardcode fuel price to 2.05
+            fuel_price = 2.05
+            #fuel_price = float(entry_fuel_price.get()) if entry_fuel_price.get() else None
             pump_price = float(entry_pump_price.get()) if entry_pump_price.get() else None
 
             if not liters:
@@ -93,7 +143,7 @@ def calculate_efficiency():
             result_mpg = (km / 1.60934) / (liters * 0.264172)
             result_mpg_var.set(f"MPG: {result_mpg:.2f}")
     except Exception as e:
-        messagebox.showerror(title="Error", message="Use either MPG or input more parameters for conversion.")
+        messagebox.showerror(title="Error", message="Use either MPG and fuel price or input more parameters for conversion.")
 
 
 
@@ -178,13 +228,27 @@ for i in range(9):
     mainframe.rowconfigure(i, weight=1)
 
 ######################################################
-#                      LABELLING FOR TITLE AND HOWTO
+#                      LABELLING FOR HARDCODE RON95 price
 ######################################################
 #ttk.Label(mainframe, text="Enter MPG only or other metrics", font=custom_font, foreground="blue", background="white").grid(row=0, column=0, columnspan=4, sticky="NSEW", padx=5, pady=5)
-ttk.Label(mainframe, text="Enter MPG only or other metrics", font=custom_font, foreground="blue", background="white").grid(row=0, column=0, columnspan=4, sticky=(tk.E), padx=5, pady=5)
 
+from datetime import date
+
+# Get today's date and format it as dd/mm/yyyy
+today = date.today().strftime("%d/%m/%Y")
+
+# Define the RON95 price
+ron95_price = 2.05
+
+# Set the label text with the formatted date and RON95 price
+label_text = f"RON95 price @ {ron95_price:.2f} as of {today}"
+
+ttk.Label(mainframe, text=label_text, font=custom_font, foreground="blue", background="white", anchor="center").grid(row=0, column=0, columnspan=4, sticky="nsew", padx=5, pady=5)
+
+#ttk.Label(mainframe, text=label_text, font=custom_font, foreground="blue", background="white").grid(row=0, column=0, columnspan=4, sticky=(tk.E), padx=5, pady=5)
+
+#ttk.Label(mainframe, text="Enter MPG only or other metrics", font=custom_font, foreground="blue", background="white").grid(row=0, column=0, columnspan=4, sticky=(tk.E), padx=5, pady=5)
 #ttk.Label(mainframe, text="Enter MPG only or other metrics", font=custom_font, foreground="blue", background="white").grid(row=0, column=0, columnspan=4, sticky=(tk.N, tk.S, tk.E, tk.W), padx=5, pady=5)
-
 #ttk.Label(mainframe, text="Enter MPG only or other metrics", font=custom_font, foreground="blue", background="white").grid(row=0, column=0, sticky=(tk.E), padx=5, pady=5)
 #entry_liters = ttk.Entry(mainframe, width=7, font=custom_font)
 #entry_liters.grid(row=0, column=1, padx=5, pady=5)
@@ -208,11 +272,18 @@ for sohairow2 in range (2,3):
     entry_km = ttk.Entry(mainframe, width=7)
     entry_km.grid(row=sohairow2, column=1, padx=5)
     sohairow2 +=1
+    #### HARDCODED RON95 PRICES
     ttk.Label(mainframe, text="Fuel price (RM/L):",font=custom_font, foreground="blue", background="white").grid(row=sohairow2, column=0, sticky=(tk.E), padx=5)
     entry_fuel_price = ttk.Entry(mainframe, width=7)
+    entry_fuel_price.insert(0, '2.05')
     entry_fuel_price.grid(row=sohairow2, column=1, padx=5)
     sohairow2 +=1
-    ttk.Label(mainframe, text="Pump price (RM):",font=custom_font, foreground="blue", background="white").grid(row=sohairow2, column=0, sticky=(tk.E), padx=5)
+    ###
+    ###ttk.Label(mainframe, text="Fuel price (RM/L):",font=custom_font, foreground="blue", background="white").grid(row=sohairow2, column=0, sticky=(tk.E), padx=5)
+    ###entry_fuel_price = ttk.Entry(mainframe, width=7)
+    ###entry_fuel_price.grid(row=sohairow2, column=1, padx=5)
+    ###sohairow2 +=1
+    ttk.Label(mainframe, text="How much petrol paid (RM):",font=custom_font, foreground="blue", background="white").grid(row=sohairow2, column=0, sticky=(tk.E), padx=5)
     entry_pump_price = ttk.Entry(mainframe, width=7)
     entry_pump_price.grid(row=sohairow2, column=1, padx=5)
     sohairow2 +=1
@@ -231,16 +302,24 @@ for sohairow2 in range (2,3):
     calculate_button = ttk.Button(mainframe, text="Convert", command=calculate_efficiency)
     calculate_button.grid(row=sohairow2, column=0, columnspan=4, pady=10)
     sohairow2 +=1
-    
-    reset_button = ttk.Button(mainframe, text="Reset", command=reset)
-    reset_button.grid(row=sohairow2, column=0, columnspan=4, pady=10)
-    sohairow2 +=1
 
+    
+    ## these 2 button at same rows
+    button_frame = ttk.Frame(mainframe)
+    button_frame.grid(row=sohairow2, column=0, columnspan=4, pady=10)
+
+    reset_button = ttk.Button(button_frame, text="Reset", command=reset)
+    reset_button.pack(side=tk.LEFT, padx=5)
+
+    quit_button = ttk.Button(button_frame, text="Quit", command=root.quit)
+    quit_button.pack(side=tk.RIGHT, padx=5)
+
+    sohairow2 += 1
 
 ######################################################
 #                      INITIATE DISPLAYS FOR OUTPUTS 
 ######################################################
-for sohairow in range (9,10):
+for sohairow in range (10,11):
     result_mpg_var = tk.StringVar()
     result_mpg_label = ttk.Label(mainframe, textvariable=result_mpg_var,font=custom_fontimportant)
     result_mpg_label.grid(row=sohairow, column=0, columnspan=4)
