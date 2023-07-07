@@ -26,7 +26,7 @@ else:
 ######################################################
 #                      RESET BUTTON ACTIONS CLEAR EVERYTHING 
 ######################################################
-def reset():
+def reset_old():
     # Clear all the input fields
     entry_liters.delete(0, 'end')
     entry_km.delete(0, 'end')
@@ -45,6 +45,23 @@ def reset():
     result_rm_km_var.set("")
     result_km_l_var.set("")
     result_mpg_var.set("")
+
+
+def reset():
+    # Clear all the input fields
+    entry_fields = [entry_liters, entry_km, entry_fuel_price, entry_pump_price, entry_mpg]
+    for entry in entry_fields:
+        entry.delete(0, 'end')
+
+    # Clear all the result fields
+    result_variables = [result_liters_var, result_km_var, result_fuel_price_var,
+                        result_pump_price_var, result_l_100km_var, result_rm_km_var,
+                        result_km_l_var, result_mpg_var]
+    for var in result_variables:
+        var.set("")
+    
+    # Reset the fuel price field to the API value
+    entry_fuel_price.insert(0, fuel_price_api)
 
 
 ######################################################
