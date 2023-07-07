@@ -2,7 +2,6 @@
 
 A simple GUI application to convert between different fuel efficiency metrics.
 
-![Screenshot of the Fuel Efficiency Converter application](./screenshot.png)
 
 ## Features
 
@@ -10,10 +9,9 @@ A simple GUI application to convert between different fuel efficiency metrics.
   1. Liters per 100 km
   2. RM per km
   3. km per liter
+  4. MPG
 - User inputs for distance, fuel consumption, and fuel price
 - Output with all calculated metrics
-
-## Installation
 
 ### Prerequisites
 
@@ -24,22 +22,10 @@ A simple GUI application to convert between different fuel efficiency metrics.
 - tkinter
 - ttkthemes
 
-### Setup
-
-1. Clone the repository:
-
-
-2. Change to the project directory:
-
-
-3. Install dependencies:
-
 
 ## Usage
 
 Run the script:
-
-
 Enter the distance, fuel consumption, and fuel price values, then click the "Calculate" button to see the results.
 
 ## License
