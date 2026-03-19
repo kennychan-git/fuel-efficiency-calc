@@ -94,6 +94,7 @@ class FuelCalcApp:
         self.diesel_var = tk.BooleanVar(value=False)
         self.results: dict[str, tk.StringVar] = {k: tk.StringVar() for k in self.OUTPUT_KEYS}
         self.entries: dict[str, ttk.Entry] = {}
+        self._resetting = False  # Guard to suppress toggle side-effects during reset
 
         self._build_ui()
 
@@ -202,6 +203,9 @@ class FuelCalcApp:
 
     def _on_fuel_toggle(self, changed: str):
         """Enforce mutual exclusion across fuel checkboxes and manage subsidy state."""
+        if self._resetting:
+            return  # Reset handles all state itself — skip side-effects
+
         # If the changed checkbox was just ticked, untick the other one
         if changed == "ron97" and self.ron97_var.get():
             self.diesel_var.set(False)
@@ -249,18 +253,25 @@ class FuelCalcApp:
 
     # --- LOGIC ---
     def reset(self):
-        for entry in self.entries.values():
-            entry.delete(0, "end")
-        self.subsidized_var.set(False)
-        self.ron97_var.set(False)
-        self.diesel_var.set(False)
-        # Re-enable all checkboxes
-        self.ron97_check.config(state="normal")
-        self.diesel_check.config(state="normal")
-        self.subsidy_check.config(state="normal")
-        self.entries["market_price"].insert(0, self.price_ron95)
-        for var in self.results.values():
-            var.set("")
+        self._resetting = True
+        try:
+            # Clear all input fields
+            for entry in self.entries.values():
+                entry.delete(0, "end")
+            # Reset checkboxes (traces are suppressed by _resetting guard)
+            self.subsidized_var.set(False)
+            self.ron97_var.set(False)
+            self.diesel_var.set(False)
+            # Re-enable all checkboxes
+            self.ron97_check.config(state="normal")
+            self.diesel_check.config(state="normal")
+            self.subsidy_check.config(state="normal")
+            # Populate market rate once, cleanly
+            self.entries["market_price"].insert(0, self.price_ron95)
+            for var in self.results.values():
+                var.set("")
+        finally:
+            self._resetting = False
 
     def calculate(self):
         vals = {k: self._get_float(k) for k in self.entries}
