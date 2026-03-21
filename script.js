@@ -92,10 +92,10 @@ function onFuelToggle() {
     const subsidyContainer = document.getElementById('subsidy_container');
     // BUDI95 applies to RON95 regardless of region
     if (fuel === "ron95") {
-        subsidyContainer.style.display = "block";
+        subsidyContainer.classList.remove("hidden");
         subsidyCheck.disabled = false;
     } else {
-        subsidyContainer.style.display = "none";
+        subsidyContainer.classList.add("hidden");
         subsidyCheck.checked = false;
     }
     syncMarketRate();
