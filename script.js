@@ -90,8 +90,8 @@ function onFuelToggle() {
     const fuel = document.querySelector('input[name="fuel"]:checked').value;
     const subsidyCheck = document.getElementById('subsidized_var');
     const subsidyContainer = document.getElementById('subsidy_container');
-    // BUDI95 only applies to RON95 in West Malaysia
-    if (fuel === "ron95" && !isEastMalaysia()) {
+    // BUDI95 applies to RON95 regardless of region
+    if (fuel === "ron95") {
         subsidyContainer.style.display = "block";
         subsidyCheck.disabled = false;
     } else {
