@@ -395,7 +395,7 @@
                     <div class="toggle-sub">Eligible recipients only</div>
                 </div>
                 <label class="switch">
-                    <input type="checkbox" id="subsidized_var">
+                    <input type="checkbox" id="subsidized_var" onchange="onSubsidyToggle()">
                     <span class="slider"></span>
                 </label>
             </div>
@@ -439,7 +439,7 @@
 
     <!-- Actions -->
     <button class="btn-primary" onclick="calculate()">Calculate</button>
-    <button class="btn-ghost" onclick="resetForm()">Clear All</button>
+    <button class="btn-ghost" onclick="resetForm()">Reset</button>
 
     <!-- Results -->
     <div id="results">
