@@ -3,57 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fuel Efficiency Calculator</title>
+    <title>BUDI95 Trip & MPG Calculator</title>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; padding: 20px; background-color: #f4f4f9; }
-        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-        h2 { color: #333; margin-top: 0; }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        .result { margin-top: 20px; padding: 15px; background: #e7f3ff; border-radius: 6px; display: none; }
-        .val { font-weight: bold; color: #007bff; }
+        :root { --primary: #2e7d32; --error: #d32f2f; --bg: #f5f5f5; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; }
+        .container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
+        .header { text-align: center; color: var(--error); font-weight: bold; margin-bottom: 20px; font-size: 0.9rem; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .input-group { margin-bottom: 12px; }
+        label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
+        .fuel-types { display: flex; gap: 15px; margin: 15px 0; padding: 10px; border: 1px solid #eee; border-radius: 8px; }
+        .subsidy-group { margin: 15px 0; background: #e8f5e9; padding: 10px; border-radius: 8px; }
+        button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1rem; margin-top: 10px; }
+        .results { margin-top: 20px; border-top: 2px solid #eee; padding-top: 15px; display: none; }
+        .result-item { margin-bottom: 8px; font-size: 1rem; }
+        .important { font-size: 1.2rem; font-weight: bold; color: var(--primary); }
+        .btn-reset { background: #757575; margin-top: 10px; }
+        input.error { border-color: var(--error); color: var(--error); }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Fuel Efficiency</h2>
+<div class="container">
+    <div id="header" class="header">Fetching live fuel rates...</div>
     
     <div class="input-group">
-        <label>Distance Traveled (km)</label>
-        <input type="number" id="distance" placeholder="e.g. 450" oninput="calculate()">
+        <label>Current Market Rate (RM/L):</label>
+        <input type="number" id="market_price" step="0.01">
     </div>
 
     <div class="input-group">
-        <label>Fuel Consumed (Liters)</label>
-        <input type="number" id="fuel" placeholder="e.g. 35" oninput="calculate()">
+        <label>Distance Driven (KM):</label>
+        <input type="number" id="km" placeholder="Enter distance">
     </div>
 
-    <div id="resultBox" class="result">
-        <div>Efficiency: <span id="kmL" class="val">0</span> km/L</div>
-        <div>Consumption: <span id="L100" class="val">0</span> L/100km</div>
+    <div class="input-group">
+        <label>Pump Meter Shows (RM):</label>
+        <input type="number" id="pump_display_rm" placeholder="Optional">
+    </div>
+
+    <div class="input-group">
+        <label>Manual Liters (L):</label>
+        <input type="number" id="liters" placeholder="Optional">
+    </div>
+
+    <div class="input-group">
+        <label>OR Input MPG:</label>
+        <input type="number" id="mpg" placeholder="Optional">
+    </div>
+
+    <div class="fuel-types">
+        <label style="display:inline"><input type="radio" name="fuel" value="ron95" checked onchange="onFuelToggle()"> RON95</label>
+        <label style="display:inline"><input type="radio" name="fuel" value="ron97" onchange="onFuelToggle()"> RON97</label>
+        <label style="display:inline"><input type="radio" name="fuel" value="diesel" onchange="onFuelToggle()"> Diesel</label>
+    </div>
+
+    <div class="subsidy-group" id="subsidy_container">
+        <label style="display:flex; align-items:center; cursor:pointer;">
+            <input type="checkbox" id="subsidized_var" style="width:auto; margin-right:10px;"> Eligible for BUDI95 (RM1.99 rate)
+        </label>
+    </div>
+
+    <button onclick="calculate()">Calculate Efficiency</button>
+    <button class="btn-reset" onclick="resetForm()">Reset</button>
+
+    <div id="results" class="results">
+        <div id="res_liters" class="result-item"></div>
+        <div id="res_paid" class="result-item important"></div>
+        <div id="res_market" class="result-item"></div>
+        <div id="res_savings" class="result-item" style="color:#2e7d32; font-weight:bold;"></div>
+        <div id="res_rm_km" class="result-item important"></div>
+        <div id="res_km_l" class="result-item"></div>
+        <div id="res_l100" class="result-item"></div>
+        <div id="res_mpg" class="result-item"></div>
     </div>
 </div>
 
-<script>
-    function calculate() {
-        const dist = document.getElementById('distance').value;
-        const fuel = document.getElementById('fuel').value;
-        const resultBox = document.getElementById('resultBox');
-
-        if (dist > 0 && fuel > 0) {
-            const kmL = (dist / fuel).toFixed(2);
-            const l100 = ((fuel / dist) * 100).toFixed(2);
-            
-            document.getElementById('kmL').innerText = kmL;
-            document.getElementById('L100').innerText = l100;
-            resultBox.style.display = 'block';
-        } else {
-            resultBox.style.display = 'none';
-        }
-    }
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
