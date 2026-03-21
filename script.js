@@ -82,7 +82,6 @@ function syncMarketRate() {
     // East Malaysia diesel uses its own subsidised rate from the API
     const priceKey = (fuel === "diesel" && em) ? "diesel_em" : fuel;
     const price = currentPrices[priceKey];
-    console.log(`[syncMarketRate] fuel=${fuel} em=${em} priceKey=${priceKey} price=${price}`);
     document.getElementById('market_price').value = price || "";
 }
 
@@ -104,6 +103,16 @@ function onFuelToggle() {
 function onRegionToggle() {
     // Re-run fuel toggle logic to update subsidy visibility + market rate
     onFuelToggle();
+}
+
+function onSubsidyToggle() {
+    // Swap market rate field between BUDI rate and actual market rate
+    const isSubsidized = document.getElementById('subsidized_var').checked;
+    if (isSubsidized) {
+        document.getElementById('market_price').value = budiRate.toFixed(2);
+    } else {
+        syncMarketRate();  // Restore the market rate for the selected fuel
+    }
 }
 
 // --- CALCULATE ---
