@@ -16,14 +16,15 @@ KM_TO_MILES = 1.60934
 L_TO_GALLONS = 0.264172
 FALLBACK_PRICE_95 = "3.27"
 FALLBACK_PRICE_97 = "4.55"
-FALLBACK_PRICE_DIESEL = "2.35"
+FALLBACK_PRICE_DIESEL = "4.72"
+FALLBACK_PRICE_DIESEL_EM = "2.15"
 FALLBACK_BUDI_RATE = 1.99
 # Returns the single most recent weekly record, sorted descending by date
 API_URL = "https://api.data.gov.my/data-catalogue?id=fuelprice&limit=1&sort=-date"
 
 
 # --- PRICE FETCHING ---
-def fetch_fuel_prices() -> tuple[str, str, str, float]:
+def fetch_fuel_prices() -> tuple[str, str, str, str, float]:
     """Fetch latest RON95, RON97, diesel prices and BUDI95 rate from data.gov.my.
     Returns fallback values on any failure."""
     try:
@@ -33,12 +34,13 @@ def fetch_fuel_prices() -> tuple[str, str, str, float]:
 
         if not data:
             print("[WARN] data.gov.my returned empty response, using fallback.")
-            return (FALLBACK_PRICE_95, FALLBACK_PRICE_97, FALLBACK_PRICE_DIESEL, FALLBACK_BUDI_RATE)
+            return (FALLBACK_PRICE_95, FALLBACK_PRICE_97, FALLBACK_PRICE_DIESEL, FALLBACK_PRICE_DIESEL_EM, FALLBACK_BUDI_RATE)
 
         latest = data[0]
         price95 = f"{latest['ron95']:.2f}" if "ron95" in latest else None
         price97 = f"{latest['ron97']:.2f}" if "ron97" in latest else None
         price_diesel = f"{latest['diesel']:.2f}" if "diesel" in latest else None
+        price_diesel_em = f"{latest['diesel_eastmsia']:.2f}" if "diesel_eastmsia" in latest else None
         budi_rate = float(latest["ron95_budi95"]) if "ron95_budi95" in latest else None
 
         if not price95:
@@ -47,6 +49,8 @@ def fetch_fuel_prices() -> tuple[str, str, str, float]:
             print("[WARN] RON97 field missing in API response, using fallback.")
         if not price_diesel:
             print("[WARN] Diesel field missing in API response, using fallback.")
+        if not price_diesel_em:
+            print("[WARN] diesel_eastmsia field missing in API response, using fallback.")
         if budi_rate is None:
             print("[WARN] ron95_budi95 field missing in API response, using fallback.")
 
@@ -58,19 +62,20 @@ def fetch_fuel_prices() -> tuple[str, str, str, float]:
             price95 or FALLBACK_PRICE_95,
             price97 or FALLBACK_PRICE_97,
             price_diesel or FALLBACK_PRICE_DIESEL,
+            price_diesel_em or FALLBACK_PRICE_DIESEL_EM,
             budi_rate if budi_rate is not None else FALLBACK_BUDI_RATE,
         )
 
     except (requests.RequestException, KeyError, ValueError, IndexError) as e:
         print(f"[WARN] Fuel price fetch failed: {e}")
 
-    return (FALLBACK_PRICE_95, FALLBACK_PRICE_97, FALLBACK_PRICE_DIESEL, FALLBACK_BUDI_RATE)
+    return (FALLBACK_PRICE_95, FALLBACK_PRICE_97, FALLBACK_PRICE_DIESEL, FALLBACK_PRICE_DIESEL_EM, FALLBACK_BUDI_RATE)
 
 
 def load_prices_async():
     """Fetch all fuel prices in background, then update UI safely."""
-    price95, price97, price_diesel, budi_rate = fetch_fuel_prices()
-    root.after(0, lambda: app.update_fuel_prices(price95, price97, price_diesel, budi_rate))
+    price95, price97, price_diesel, price_diesel_em, budi_rate = fetch_fuel_prices()
+    root.after(0, lambda: app.update_fuel_prices(price95, price97, price_diesel, price_diesel_em, budi_rate))
 
 
 # --- APP CLASS ---
@@ -93,11 +98,13 @@ class FuelCalcApp:
         self.price_ron95: str = FALLBACK_PRICE_95
         self.price_ron97: str = FALLBACK_PRICE_97
         self.price_diesel: str = FALLBACK_PRICE_DIESEL
+        self.price_diesel_em: str = FALLBACK_PRICE_DIESEL_EM
         self.budi_rate: float = FALLBACK_BUDI_RATE
 
         self.subsidized_var = tk.BooleanVar(value=False)
         self.ron97_var = tk.BooleanVar(value=False)
         self.diesel_var = tk.BooleanVar(value=False)
+        self.region_var = tk.StringVar(value="wm")  # "wm" or "em"
         self.results: dict[str, tk.StringVar] = {k: tk.StringVar() for k in self.OUTPUT_KEYS}
         self.entries: dict[str, ttk.Entry] = {}
         self._resetting = False  # Guard to suppress toggle side-effects during reset
@@ -145,21 +152,36 @@ class FuelCalcApp:
         )
         self.diesel_check.pack(side="left", padx=10)
 
-        # BUDI95 subsidy checkbox (RON95 only)
+        # --- Region radio buttons ---
+        region_frame = ttk.LabelFrame(main, text="Region", padding="5")
+        region_frame.grid(row=7, columnspan=2, pady=(2, 2), sticky="EW", padx=5)
+
+        ttk.Radiobutton(
+            region_frame, text="West Malaysia",
+            variable=self.region_var, value="wm",
+            command=self._on_region_toggle,
+        ).pack(side="left", padx=10)
+        ttk.Radiobutton(
+            region_frame, text="East Malaysia",
+            variable=self.region_var, value="em",
+            command=self._on_region_toggle,
+        ).pack(side="left", padx=10)
+
+        # BUDI95 subsidy checkbox (RON95 only, both regions)
         self.subsidy_check = ttk.Checkbutton(
             main,
             text="Eligible for BUDI95 subsidised rate",
             variable=self.subsidized_var,
         )
-        self.subsidy_check.grid(row=7, columnspan=2, pady=(2, 10))
+        self.subsidy_check.grid(row=8, columnspan=2, pady=(2, 10))
 
         # Calculate button
         ttk.Button(main, text="Calculate Efficiency", command=self.calculate).grid(
-            row=8, columnspan=2, pady=10
+            row=9, columnspan=2, pady=10
         )
 
         # Result labels
-        row_idx = 9
+        row_idx = 10
         for key in self.OUTPUT_KEYS:
             is_important = key in ("paid", "rm_km")
             lbl = ttk.Label(
@@ -178,14 +200,15 @@ class FuelCalcApp:
         ttk.Button(btn_frame, text="Quit", command=self.root.destroy).pack(side="left", padx=5)
 
     # --- HELPERS ---
-    def update_fuel_prices(self, price95: str, price97: str, price_diesel: str, budi_rate: float):
+    def update_fuel_prices(self, price95: str, price97: str, price_diesel: str, price_diesel_em: str, budi_rate: float):
         """Called from async thread to safely update UI with fetched prices."""
         self.price_ron95 = price95
         self.price_ron97 = price97
         self.price_diesel = price_diesel
+        self.price_diesel_em = price_diesel_em
         self.budi_rate = budi_rate
         self.header_label.config(
-            text=f"RON95: RM{price95}  |  RON97: RM{price97}  |  Diesel: RM{price_diesel}"
+            text=f"RON95: RM{price95}  |  RON97: RM{price97}  |  Diesel: RM{price_diesel} (WM) / RM{price_diesel_em} (EM)"
         )
         self._sync_market_rate()
 
@@ -197,14 +220,21 @@ class FuelCalcApp:
             return "diesel"
         return "ron95"
 
+    def _is_east_malaysia(self) -> bool:
+        return self.region_var.get() == "em"
+
     def _sync_market_rate(self):
-        """Update the market rate entry to match the currently selected fuel type."""
-        price_map = {
-            "ron95": self.price_ron95,
-            "ron97": self.price_ron97,
-            "diesel": self.price_diesel,
-        }
-        price = price_map[self._active_fuel()]
+        """Update the market rate entry to match the currently selected fuel and region."""
+        fuel = self._active_fuel()
+        if fuel == "diesel" and self._is_east_malaysia():
+            price = self.price_diesel_em
+        else:
+            price_map = {
+                "ron95": self.price_ron95,
+                "ron97": self.price_ron97,
+                "diesel": self.price_diesel,
+            }
+            price = price_map[fuel]
         self.entries["market_price"].delete(0, "end")
         self.entries["market_price"].insert(0, price)
 
@@ -221,7 +251,7 @@ class FuelCalcApp:
 
         fuel = self._active_fuel()
 
-        # Only RON95 supports BUDI95 subsidy
+        # BUDI95 applies to RON95 regardless of region
         if fuel == "ron95":
             self.subsidy_check.config(state="normal")
         else:
@@ -240,6 +270,10 @@ class FuelCalcApp:
             self.ron97_check.config(state="normal")
             self.diesel_check.config(state="normal")
 
+        self._sync_market_rate()
+
+    def _on_region_toggle(self):
+        """Handle region toggle: sync market rate (diesel price changes by region)."""
         self._sync_market_rate()
 
     def _get_float(self, key: str) -> float | None:
@@ -273,6 +307,8 @@ class FuelCalcApp:
             self.ron97_check.config(state="normal")
             self.diesel_check.config(state="normal")
             self.subsidy_check.config(state="normal")
+            # Reset region to West Malaysia
+            self.region_var.set("wm")
             # Populate market rate once, cleanly
             self.entries["market_price"].insert(0, self.price_ron95)
             for var in self.results.values():
