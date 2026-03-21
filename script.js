@@ -2,7 +2,7 @@
 const MPG_TO_L100KM = 235.215;
 const KM_TO_MILES = 1.60934;
 const L_TO_GALLONS = 0.264172;
-const FALLBACK = { ron95: "3.27", ron97: "4.55", diesel: "2.35", budi95: "1.99" };
+const FALLBACK = { ron95: "3.27", ron97: "4.55", diesel: "2.35", diesel_em: "2.15", budi95: "1.99" };
 const API_URL = "https://api.data.gov.my/data-catalogue?id=fuelprice&limit=1&sort=-date";
 
 let currentPrices = { ...FALLBACK };
@@ -31,6 +31,7 @@ async function fetchPrices() {
         currentPrices.ron95 = latest.ron95?.toFixed(2) || FALLBACK.ron95;
         currentPrices.ron97 = latest.ron97?.toFixed(2) || FALLBACK.ron97;
         currentPrices.diesel = latest.diesel?.toFixed(2) || FALLBACK.diesel;
+        currentPrices.diesel_em = latest.diesel_eastmsia?.toFixed(2) || FALLBACK.diesel_em;
         budiRate = latest.ron95_budi95 ?? parseFloat(FALLBACK.budi95);
 
         // Format effective date e.g. "2026-03-19" → "19 Mar 2026"
@@ -69,17 +70,26 @@ function formatDate(dateStr) {
     return d.toLocaleDateString("en-MY", { day: "numeric", month: "short", year: "numeric" });
 }
 
-// --- FUEL TYPE TOGGLE ---
+// --- REGION + FUEL TOGGLE ---
+function isEastMalaysia() {
+    const checked = document.querySelector('input[name="region"]:checked');
+    return checked ? checked.value === "em" : false;
+}
+
 function syncMarketRate() {
     const fuel = document.querySelector('input[name="fuel"]:checked').value;
-    document.getElementById('market_price').value = currentPrices[fuel];
+    const em = isEastMalaysia();
+    // East Malaysia diesel uses its own subsidised rate from the API
+    const priceKey = (fuel === "diesel" && em) ? "diesel_em" : fuel;
+    document.getElementById('market_price').value = currentPrices[priceKey] || "";
 }
 
 function onFuelToggle() {
     const fuel = document.querySelector('input[name="fuel"]:checked').value;
     const subsidyCheck = document.getElementById('subsidized_var');
     const subsidyContainer = document.getElementById('subsidy_container');
-    if (fuel === "ron95") {
+    // BUDI95 only applies to RON95 in West Malaysia
+    if (fuel === "ron95" && !isEastMalaysia()) {
         subsidyContainer.style.display = "block";
         subsidyCheck.disabled = false;
     } else {
@@ -87,6 +97,11 @@ function onFuelToggle() {
         subsidyCheck.checked = false;
     }
     syncMarketRate();
+}
+
+function onRegionToggle() {
+    // Re-run fuel toggle logic to update subsidy visibility + market rate
+    onFuelToggle();
 }
 
 // --- CALCULATE ---
@@ -174,7 +189,8 @@ function calculate() {
 function resetForm() {
     document.querySelectorAll('input[type="number"]').forEach(i => i.value = "");
     document.getElementById('results').style.display = "none";
-    // Reset fuel type to RON95
+    // Reset region to West Malaysia and fuel to RON95
+    document.querySelector('input[name="region"][value="wm"]').checked = true;
     document.querySelector('input[name="fuel"][value="ron95"]').checked = true;
     onFuelToggle();  // Restores subsidy visibility + syncs market rate
 }
