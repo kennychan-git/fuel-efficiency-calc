@@ -3,116 +3,501 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BUDI95 Trip & MPG Calculator</title>
+    <title>FuelCalc</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #2e7d32; --error: #d32f2f; --bg: #f5f5f5; --accent: #007bff; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; }
-        .container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
-        .header { text-align: center; color: var(--error); font-weight: bold; margin-bottom: 20px; font-size: 0.85rem; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        .input-group { margin-bottom: 10px; }
-        label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 3px; color: #555; }
-        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 1rem; transition: 0.2s; }
-        input:focus { border-color: var(--accent); outline: none; background: #f0f7ff; }
-        .toggle-row { display: flex; justify-content: space-around; margin: 15px 0; padding: 10px; border: 1px solid #eee; border-radius: 8px; background: #fafafa; }
-        .toggle-row label { font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px; cursor: pointer; color: #333; }
-        .toggle-row input[type="radio"] { width: auto; margin: 0; cursor: pointer; }
-        .region-row { background: #f0f4ff; border-color: #c5cae9; }
-        .subsidy-group { margin: 10px 0; background: #e8f5e9; padding: 12px; border-radius: 8px; border: 1px solid #c8e6c9; }
-        button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1rem; margin-top: 10px; }
-        .btn-reset { background: #757575; margin-top: 8px; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* Results Section */
-        .results { margin-top: 20px; border-top: 2px solid #eee; padding-top: 15px; display: none; }
-        .result-item { margin-bottom: 6px; font-size: 0.95rem; display: flex; justify-content: space-between; }
-        .important { font-size: 1.1rem; font-weight: bold; color: var(--primary); border-bottom: 1px dashed #ddd; padding-bottom: 4px; }
+        :root {
+            --bg:           #f2f2f7;
+            --card:         rgba(255,255,255,0.82);
+            --card-border:  rgba(0,0,0,0.07);
+            --surface:      rgba(118,118,128,0.12);
+            --surface-hover:rgba(118,118,128,0.18);
+            --label:        #6e6e73;
+            --body:         #1c1c1e;
+            --accent:       #0071e3;
+            --green:        #34c759;
+            --red:          #ff3b30;
+            --amber:        #ff9f0a;
+            --sep:          rgba(60,60,67,0.12);
+            --radius-card:  20px;
+            --radius-input: 12px;
+            --radius-pill:  100px;
+            --font:         'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --shadow:       0 8px 32px rgba(0,0,0,0.10), 0 1.5px 4px rgba(0,0,0,0.06);
+        }
 
-        /* Efficiency Gauge */
-        .gauge-container { margin-top: 15px; background: #eee; height: 10px; border-radius: 5px; overflow: hidden; position: relative; }
-        .gauge-bar { height: 100%; width: 0%; transition: width 0.5s ease-in-out; }
-        .gauge-labels { display: flex; justify-content: space-between; font-size: 0.7rem; color: #888; margin-top: 4px; }
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 32px 16px 64px;
+            color: var(--body);
+        }
+
+        /* ── Page chrome ── */
+        .page { width: 100%; max-width: 400px; }
+
+        .app-title {
+            text-align: center;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--label);
+            margin-bottom: 18px;
+        }
+
+        /* ── Live rates pill ── */
+        #header {
+            text-align: center;
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: var(--label);
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-pill);
+            padding: 8px 18px;
+            margin-bottom: 16px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            line-height: 1.6;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            transition: color 0.4s;
+        }
+
+        /* ── Card ── */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-card);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .card-section {
+            padding: 16px 20px;
+        }
+        .card-section + .card-section {
+            border-top: 1px solid var(--sep);
+        }
+
+        .section-label {
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--label);
+            margin-bottom: 10px;
+        }
+
+        /* ── Inputs ── */
+        .field { margin-bottom: 0; }
+        .field + .field { border-top: 1px solid var(--sep); }
+
+        .field-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 11px 0;
+        }
+
+        .field-label {
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: var(--body);
+            flex: 1;
+        }
+
+        .field input[type="number"] {
+            width: 110px;
+            text-align: right;
+            border: none;
+            background: transparent;
+            font-family: var(--font);
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--accent);
+            outline: none;
+            -moz-appearance: textfield;
+        }
+        .field input[type="number"]::-webkit-outer-spin-button,
+        .field input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+        .field input[type="number"]::placeholder { color: #b0b0b8; font-weight: 400; }
+
+        /* market rate — larger, prominent */
+        #market_price {
+            font-size: 1.35rem !important;
+            font-weight: 600 !important;
+            letter-spacing: -0.01em;
+        }
+
+        /* ── Segmented control ── */
+        .seg-wrap { display: flex; gap: 0; }
+
+        .seg-control {
+            display: flex;
+            background: var(--surface);
+            border-radius: var(--radius-pill);
+            padding: 3px;
+            gap: 2px;
+            width: 100%;
+        }
+
+        .seg-control label {
+            flex: 1;
+            text-align: center;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--label);
+            padding: 7px 6px;
+            border-radius: var(--radius-pill);
+            cursor: pointer;
+            transition: background 0.22s, color 0.22s, box-shadow 0.22s;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .seg-control input[type="radio"] { display: none; }
+
+        .seg-control input[type="radio"]:checked + label {
+            background: white;
+            color: var(--body);
+            font-weight: 600;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.14), 0 0.5px 1px rgba(0,0,0,0.08);
+        }
+
+        /* ── BUDI toggle ── */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+        }
+        .toggle-label {
+            font-size: 0.9rem;
+            color: var(--body);
+        }
+        .toggle-sub {
+            font-size: 0.75rem;
+            color: var(--label);
+            margin-top: 1px;
+        }
+
+        /* iOS-style toggle switch */
+        .switch { position: relative; width: 50px; height: 28px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; inset: 0;
+            background: var(--surface);
+            border-radius: var(--radius-pill);
+            transition: background 0.25s;
+            cursor: pointer;
+        }
+        .slider::before {
+            content: "";
+            position: absolute;
+            width: 22px; height: 22px;
+            left: 3px; top: 3px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.22);
+            transition: transform 0.25s cubic-bezier(.4,0,.2,1);
+        }
+        .switch input:checked + .slider { background: var(--green); }
+        .switch input:checked + .slider::before { transform: translateX(22px); }
+
+        /* hidden = subsidy container */
+        #subsidy_container { display: block; }
+        #subsidy_container.hidden { display: none; }
+
+        /* ── Divider ── */
+        .or-divider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 4px 0 8px;
+            color: var(--label);
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        .or-divider::before,
+        .or-divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--sep);
+        }
+
+        /* ── Buttons ── */
+        .btn-primary {
+            width: 100%;
+            padding: 15px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: var(--radius-input);
+            font-family: var(--font);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.18s, transform 0.12s;
+            letter-spacing: 0.01em;
+        }
+        .btn-primary:active { opacity: 0.82; transform: scale(0.988); }
+
+        .btn-ghost {
+            width: 100%;
+            padding: 13px;
+            background: transparent;
+            color: var(--accent);
+            border: none;
+            font-family: var(--font);
+            font-size: 0.88rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: var(--radius-input);
+            transition: background 0.18s;
+            margin-top: 2px;
+        }
+        .btn-ghost:hover { background: var(--surface); }
+
+        /* ── Results card ── */
+        #results {
+            display: none;
+            animation: slideUp 0.36s cubic-bezier(.4,0,.2,1);
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 11px 0;
+        }
+        .result-row + .result-row { border-top: 1px solid var(--sep); }
+
+        .result-key {
+            font-size: 0.88rem;
+            color: var(--label);
+            font-weight: 400;
+        }
+        .result-val {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: var(--body);
+        }
+        .result-val.large {
+            font-size: 1.2rem;
+            letter-spacing: -0.02em;
+        }
+        .result-val.green { color: var(--green); }
+        .result-val.accent { color: var(--accent); }
+
+        /* ── Gauge ── */
+        .gauge-wrap { padding: 14px 0 6px; }
+        .gauge-title {
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: var(--label);
+            margin-bottom: 8px;
+        }
+        .gauge-track {
+            height: 6px;
+            background: var(--surface);
+            border-radius: var(--radius-pill);
+            overflow: hidden;
+        }
+        .gauge-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: var(--radius-pill);
+            transition: width 0.6s cubic-bezier(.4,0,.2,1), background-color 0.4s;
+        }
+        .gauge-ends {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.68rem;
+            color: #b0b0b8;
+            margin-top: 5px;
+        }
+
+        /* ── MPG accent ── */
+        .mpg-label { color: var(--accent) !important; }
+        .mpg-input { color: var(--accent) !important; }
+        .mpg-input::placeholder { color: #a0c4f0 !important; }
     </style>
 </head>
 <body>
+<div class="page">
 
-<div class="container">
-    <div id="header" class="header">Connecting to data.gov.my...</div>
+    <p class="app-title">FuelCalc Malaysia</p>
 
-    <div id="financial_inputs">
-        <div class="input-group">
-            <label>Current Market Rate (RM/L):</label>
-            <input type="number" id="market_price" step="0.01">
+    <!-- Live rate pill -->
+    <div id="header">Connecting to data.gov.my…</div>
+
+    <!-- Market rate card -->
+    <div class="card">
+        <div class="card-section">
+            <div class="section-label">Market Rate</div>
+            <div class="field">
+                <div class="field-inner">
+                    <span class="field-label">RM per litre</span>
+                    <input type="number" id="market_price" step="0.01" placeholder="—">
+                </div>
+            </div>
         </div>
 
-        <!-- Fuel Type -->
-        <div class="toggle-row">
-            <label><input type="radio" name="fuel" value="ron95" checked onchange="onFuelToggle()"> RON95</label>
-            <label><input type="radio" name="fuel" value="ron97" onchange="onFuelToggle()"> RON97</label>
-            <label><input type="radio" name="fuel" value="diesel" onchange="onFuelToggle()"> Diesel</label>
+        <!-- Fuel type -->
+        <div class="card-section">
+            <div class="section-label">Fuel Type</div>
+            <div class="seg-control">
+                <input type="radio" name="fuel" id="f95" value="ron95" checked onchange="onFuelToggle()">
+                <label for="f95">RON 95</label>
+                <input type="radio" name="fuel" id="f97" value="ron97" onchange="onFuelToggle()">
+                <label for="f97">RON 97</label>
+                <input type="radio" name="fuel" id="fdiesel" value="diesel" onchange="onFuelToggle()">
+                <label for="fdiesel">Diesel</label>
+            </div>
         </div>
 
         <!-- Region -->
-        <div class="toggle-row region-row">
-            <label><input type="radio" name="region" value="wm" checked onclick="onRegionToggle()"> 🌏 West Malaysia</label>
-            <label><input type="radio" name="region" value="em" onclick="onRegionToggle()"> 🌏 East Malaysia</label>
+        <div class="card-section">
+            <div class="section-label">Region</div>
+            <div class="seg-control">
+                <input type="radio" name="region" id="rwm" value="wm" checked onclick="onRegionToggle()">
+                <label for="rwm">West Malaysia</label>
+                <input type="radio" name="region" id="rem" value="em" onclick="onRegionToggle()">
+                <label for="rem">East Malaysia</label>
+            </div>
         </div>
 
-        <!-- BUDI95 Subsidy (RON95 + West Malaysia only) -->
-        <div class="subsidy-group" id="subsidy_container">
-            <label style="display:flex; align-items:center; cursor:pointer; font-size: 0.85rem;">
-                <input type="checkbox" id="subsidized_var" style="width:auto; margin-right:10px;"> Eligible for BUDI95 subsidised rate
-            </label>
+        <!-- BUDI95 -->
+        <div class="card-section" id="subsidy_container">
+            <div class="toggle-row">
+                <div>
+                    <div class="toggle-label">BUDI95 Subsidised Rate</div>
+                    <div class="toggle-sub">Eligible recipients only</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="subsidized_var">
+                    <span class="slider"></span>
+                </label>
+            </div>
         </div>
     </div>
 
-    <div class="input-group">
-        <label>Distance Driven (KM):</label>
-        <input type="number" id="km" placeholder="Total trip distance">
-    </div>
-
-    <div class="input-group">
-        <label>Pump Meter Shows (RM):</label>
-        <input type="number" id="pump_display_rm" placeholder="Amount on receipt">
-    </div>
-
-    <div class="input-group">
-        <label>Manual Liters (L):</label>
-        <input type="number" id="liters" placeholder="Exact liters pumped">
-    </div>
-
-    <div style="text-align:center; margin: 10px 0; color: #999; font-size: 0.8rem;">— OR —</div>
-
-    <div class="input-group">
-        <label style="color: var(--accent)">Input MPG (Conversion Only):</label>
-        <input type="number" id="mpg" placeholder="Enter MPG value" style="border-color: var(--accent)">
-    </div>
-
-    <button onclick="calculate()">Calculate</button>
-    <button class="btn-reset" onclick="resetForm()">Clear All</button>
-
-    <div id="results" class="results">
-        <div class="result-item important"><span>Efficiency:</span> <span id="res_km_l"></span></div>
-        <div class="result-item"><span>L/100 km:</span> <span id="res_l100"></span></div>
-        <div class="result-item"><span>Converted MPG:</span> <span id="res_mpg"></span></div>
-
-        <label style="margin-top:10px; display:block; text-align:center;">Consumption Rating (L/100km)</label>
-        <div class="gauge-container">
-            <div id="gauge" class="gauge-bar"></div>
-        </div>
-        <div class="gauge-labels">
-            <span>Efficient (4L)</span>
-            <span>Heavy (15L+)</span>
+    <!-- Trip inputs card -->
+    <div class="card">
+        <div class="card-section">
+            <div class="section-label">Trip Details</div>
+            <div class="field">
+                <div class="field-inner">
+                    <span class="field-label">Distance Driven</span>
+                    <input type="number" id="km" placeholder="km">
+                </div>
+            </div>
+            <div class="field">
+                <div class="field-inner">
+                    <span class="field-label">Pump Meter Shows</span>
+                    <input type="number" id="pump_display_rm" placeholder="RM">
+                </div>
+            </div>
+            <div class="field">
+                <div class="field-inner">
+                    <span class="field-label">Manual Litres</span>
+                    <input type="number" id="liters" placeholder="L">
+                </div>
+            </div>
         </div>
 
-        <div id="money_results" style="margin-top:15px; border-top: 1px solid #eee; padding-top:10px;">
-            <div class="result-item"><span>Total Liters:</span> <span id="res_liters"></span></div>
-            <div class="result-item important"><span>Actual Paid:</span> <span id="res_paid"></span></div>
-            <div class="result-item" style="font-size:0.8rem; color:#777;"><span>Pump Value:</span> <span id="res_market"></span></div>
-            <div class="result-item" id="res_savings_row" style="color:var(--primary); font-weight:bold;"><span>BUDI Savings:</span> <span id="res_savings"></span></div>
-            <div class="result-item important" style="color:#333"><span>Cost per KM:</span> <span id="res_rm_km"></span></div>
+        <div class="card-section">
+            <div class="or-divider">or</div>
+            <div class="field">
+                <div class="field-inner">
+                    <span class="field-label mpg-label">MPG (conversion only)</span>
+                    <input type="number" class="mpg-input" id="mpg" placeholder="MPG">
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Actions -->
+    <button class="btn-primary" onclick="calculate()">Calculate</button>
+    <button class="btn-ghost" onclick="resetForm()">Clear All</button>
+
+    <!-- Results -->
+    <div id="results">
+        <div class="card" style="margin-top:16px;">
+            <div class="card-section">
+                <div class="section-label">Efficiency</div>
+                <div class="result-row">
+                    <span class="result-key">km / L</span>
+                    <span class="result-val large accent" id="res_km_l">—</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-key">L / 100 km</span>
+                    <span class="result-val" id="res_l100">—</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-key">MPG</span>
+                    <span class="result-val" id="res_mpg">—</span>
+                </div>
+
+                <div class="gauge-wrap">
+                    <div class="gauge-title">Consumption Rating</div>
+                    <div class="gauge-track">
+                        <div class="gauge-fill" id="gauge"></div>
+                    </div>
+                    <div class="gauge-ends">
+                        <span>Efficient · 4 L</span>
+                        <span>Heavy · 15 L+</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-section" id="money_results">
+                <div class="section-label">Cost Breakdown</div>
+                <div class="result-row">
+                    <span class="result-key">Total Litres</span>
+                    <span class="result-val" id="res_liters">—</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-key">Actual Paid</span>
+                    <span class="result-val large green" id="res_paid">—</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-key">Pump Value</span>
+                    <span class="result-val" style="color:var(--label); font-size:0.85rem;" id="res_market">—</span>
+                </div>
+                <div class="result-row" id="res_savings_row" style="display:none;">
+                    <span class="result-key">BUDI Savings</span>
+                    <span class="result-val green" id="res_savings">—</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-key">Cost per KM</span>
+                    <span class="result-val large" id="res_rm_km">—</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
-
 <script src="script.js"></script>
 </body>
 </html>
