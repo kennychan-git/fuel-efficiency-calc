@@ -5,77 +5,100 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BUDI95 Trip & MPG Calculator</title>
     <style>
-        :root { --primary: #2e7d32; --error: #d32f2f; --bg: #f5f5f5; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; }
+        :root { --primary: #2e7d32; --error: #d32f2f; --bg: #f5f5f5; --accent: #007bff; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; }
         .container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
-        .header { text-align: center; color: var(--error); font-weight: bold; margin-bottom: 20px; font-size: 0.9rem; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        .input-group { margin-bottom: 12px; }
-        label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
-        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
-        .fuel-types { display: flex; gap: 15px; margin: 15px 0; padding: 10px; border: 1px solid #eee; border-radius: 8px; }
-        .subsidy-group { margin: 15px 0; background: #e8f5e9; padding: 10px; border-radius: 8px; }
+        .header { text-align: center; color: var(--error); font-weight: bold; margin-bottom: 20px; font-size: 0.85rem; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .input-group { margin-bottom: 10px; }
+        label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 3px; color: #555; }
+        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 1rem; transition: 0.2s; }
+        input:focus { border-color: var(--accent); outline: none; background: #f0f7ff; }
+        .fuel-types { display: flex; justify-content: space-around; margin: 15px 0; padding: 10px; border: 1px solid #eee; border-radius: 8px; background: #fafafa; }
+        .subsidy-group { margin: 10px 0; background: #e8f5e9; padding: 12px; border-radius: 8px; border: 1px solid #c8e6c9; }
         button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1rem; margin-top: 10px; }
+        .btn-reset { background: #757575; margin-top: 8px; }
+        
+        /* Results Section */
         .results { margin-top: 20px; border-top: 2px solid #eee; padding-top: 15px; display: none; }
-        .result-item { margin-bottom: 8px; font-size: 1rem; }
-        .important { font-size: 1.2rem; font-weight: bold; color: var(--primary); }
-        .btn-reset { background: #757575; margin-top: 10px; }
-        input.error { border-color: var(--error); color: var(--error); }
+        .result-item { margin-bottom: 6px; font-size: 0.95rem; display: flex; justify-content: space-between; }
+        .important { font-size: 1.1rem; font-weight: bold; color: var(--primary); border-bottom: 1px dashed #ddd; padding-bottom: 4px; }
+        
+        /* Efficiency Gauge */
+        .gauge-container { margin-top: 15px; background: #eee; height: 10px; border-radius: 5px; overflow: hidden; position: relative; }
+        .gauge-bar { height: 100%; width: 0%; transition: width 0.5s ease-in-out; }
+        .gauge-labels { display: flex; justify-content: space-between; font-size: 0.7rem; color: #888; margin-top: 4px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="header" class="header">Fetching live fuel rates...</div>
+    <div id="header" class="header">Connecting to data.gov.my...</div>
     
-    <div class="input-group">
-        <label>Current Market Rate (RM/L):</label>
-        <input type="number" id="market_price" step="0.01">
+    <div id="financial_inputs">
+        <div class="input-group">
+            <label>Current Market Rate (RM/L):</label>
+            <input type="number" id="market_price" step="0.01">
+        </div>
+
+        <div class="fuel-types">
+            <label><input type="radio" name="fuel" value="ron95" checked onchange="onFuelToggle()"> RON95</label>
+            <label><input type="radio" name="fuel" value="ron97" onchange="onFuelToggle()"> RON97</label>
+            <label><input type="radio" name="fuel" value="diesel" onchange="onFuelToggle()"> Diesel</label>
+        </div>
+
+        <div class="subsidy-group" id="subsidy_container">
+            <label style="display:flex; align-items:center; cursor:pointer; font-size: 0.85rem;">
+                <input type="checkbox" id="subsidized_var" style="width:auto; margin-right:10px;"> Eligible for BUDI95 (RM1.99 rate)
+            </label>
+        </div>
     </div>
 
     <div class="input-group">
         <label>Distance Driven (KM):</label>
-        <input type="number" id="km" placeholder="Enter distance">
+        <input type="number" id="km" placeholder="Total trip distance">
     </div>
 
     <div class="input-group">
         <label>Pump Meter Shows (RM):</label>
-        <input type="number" id="pump_display_rm" placeholder="Optional">
+        <input type="number" id="pump_display_rm" placeholder="Amount on receipt">
     </div>
 
     <div class="input-group">
         <label>Manual Liters (L):</label>
-        <input type="number" id="liters" placeholder="Optional">
+        <input type="number" id="liters" placeholder="Exact liters pumped">
     </div>
+
+    <div style="text-align:center; margin: 10px 0; color: #999; font-size: 0.8rem;">— OR —</div>
 
     <div class="input-group">
-        <label>OR Input MPG:</label>
-        <input type="number" id="mpg" placeholder="Optional">
+        <label style="color: var(--accent)">Input MPG (Conversion Only):</label>
+        <input type="number" id="mpg" placeholder="Enter MPG value" style="border-color: var(--accent)">
     </div>
 
-    <div class="fuel-types">
-        <label style="display:inline"><input type="radio" name="fuel" value="ron95" checked onchange="onFuelToggle()"> RON95</label>
-        <label style="display:inline"><input type="radio" name="fuel" value="ron97" onchange="onFuelToggle()"> RON97</label>
-        <label style="display:inline"><input type="radio" name="fuel" value="diesel" onchange="onFuelToggle()"> Diesel</label>
-    </div>
-
-    <div class="subsidy-group" id="subsidy_container">
-        <label style="display:flex; align-items:center; cursor:pointer;">
-            <input type="checkbox" id="subsidized_var" style="width:auto; margin-right:10px;"> Eligible for BUDI95 (RM1.99 rate)
-        </label>
-    </div>
-
-    <button onclick="calculate()">Calculate Efficiency</button>
-    <button class="btn-reset" onclick="resetForm()">Reset</button>
+    <button onclick="calculate()">Calculate</button>
+    <button class="btn-reset" onclick="resetForm()">Clear All</button>
 
     <div id="results" class="results">
-        <div id="res_liters" class="result-item"></div>
-        <div id="res_paid" class="result-item important"></div>
-        <div id="res_market" class="result-item"></div>
-        <div id="res_savings" class="result-item" style="color:#2e7d32; font-weight:bold;"></div>
-        <div id="res_rm_km" class="result-item important"></div>
-        <div id="res_km_l" class="result-item"></div>
-        <div id="res_l100" class="result-item"></div>
-        <div id="res_mpg" class="result-item"></div>
+        <div class="result-item important"><span>Efficiency:</span> <span id="res_km_l"></span></div>
+        <div class="result-item"><span>L/100 km:</span> <span id="res_l100"></span></div>
+        <div class="result-item"><span>Converted MPG:</span> <span id="res_mpg"></span></div>
+        
+        <label style="margin-top:10px; display:block; text-align:center;">Consumption Rating (L/100km)</label>
+        <div class="gauge-container">
+            <div id="gauge" class="gauge-bar"></div>
+        </div>
+        <div class="gauge-labels">
+            <span>Efficient (4L)</span>
+            <span>Heavy (15L+)</span>
+        </div>
+
+        <div id="money_results" style="margin-top:15px; border-top: 1px solid #eee; padding-top:10px;">
+            <div class="result-item"><span>Total Liters:</span> <span id="res_liters"></span></div>
+            <div class="result-item important"><span>Actual Paid:</span> <span id="res_paid"></span></div>
+            <div class="result-item" style="font-size:0.8rem; color:#777;"><span>Pump Value:</span> <span id="res_market"></span></div>
+            <div class="result-item" id="res_savings_row" style="color:var(--primary); font-weight:bold;"><span>BUDI Savings:</span> <span id="res_savings"></span></div>
+            <div class="result-item important" style="color:#333"><span>Cost per KM:</span> <span id="res_rm_km"></span></div>
+        </div>
     </div>
 </div>
 
