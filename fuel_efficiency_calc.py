@@ -9,6 +9,7 @@ try:
 except ImportError:
     HAS_THEMES = False
 
+
 # --- CONSTANTS ---
 MPG_TO_L100KM = 235.215
 FALLBACK_BUDI_RATE = 1.99
