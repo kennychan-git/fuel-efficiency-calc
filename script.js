@@ -2,7 +2,7 @@
 const MPG_TO_L100KM = 235.215;
 const KM_TO_MILES = 1.60934;
 const L_TO_GALLONS = 0.264172;
-const FALLBACK = { ron95: "3.27", ron97: "4.55", diesel: "2.35", diesel_em: "2.15", budi95: "1.99" };
+const FALLBACK = { ron95: "3.27", ron97: "4.55", diesel: "4.72", diesel_em: "2.15", budi95: "1.99" };
 const API_URL = "https://api.data.gov.my/data-catalogue?id=fuelprice&limit=1&sort=-date";
 
 let currentPrices = { ...FALLBACK };
