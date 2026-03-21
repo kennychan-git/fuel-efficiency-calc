@@ -1,12 +1,12 @@
 // --- CONSTANTS ---
 const MPG_TO_L100KM = 235.215;
-const BUDI_RATE = 1.99;
 const KM_TO_MILES = 1.60934;
 const L_TO_GALLONS = 0.264172;
-const FALLBACK = { ron95: "3.27", ron97: "4.55", diesel: "2.35" };
+const FALLBACK = { ron95: "3.27", ron97: "4.55", diesel: "2.35", budi95: "1.99" };
 const API_URL = "https://api.data.gov.my/data-catalogue?id=fuelprice&limit=1&sort=-date";
 
 let currentPrices = { ...FALLBACK };
+let budiRate = parseFloat(FALLBACK.budi95);  // Updated from API on fetch
 
 // --- PRICE FETCHING ---
 async function fetchPrices() {
@@ -31,6 +31,7 @@ async function fetchPrices() {
         currentPrices.ron95 = latest.ron95?.toFixed(2) || FALLBACK.ron95;
         currentPrices.ron97 = latest.ron97?.toFixed(2) || FALLBACK.ron97;
         currentPrices.diesel = latest.diesel?.toFixed(2) || FALLBACK.diesel;
+        budiRate = latest.ron95_budi95 ?? parseFloat(FALLBACK.budi95);
 
         // Format effective date e.g. "2026-03-19" → "19 Mar 2026"
         const effectiveDate = formatDate(latest.date);
@@ -149,7 +150,7 @@ function calculate() {
     } else {
         moneyBox.style.display = "block";
         const pump_market_value = liters * market_rate;
-        const actual_paid = (fuelType === "ron95" && isSubsidized) ? (liters * BUDI_RATE) : pump_market_value;
+        const actual_paid = (fuelType === "ron95" && isSubsidized) ? (liters * budiRate) : pump_market_value;
         const savings = pump_market_value - actual_paid;
 
         document.getElementById('res_liters').innerText = `${liters.toFixed(3)} L (${fuelType.toUpperCase()})`;
