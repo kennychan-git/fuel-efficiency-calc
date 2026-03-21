@@ -114,6 +114,7 @@ class FuelCalcApp:
         # Attach toggle handlers after UI is built
         self.ron97_var.trace_add("write", lambda *_: self._on_fuel_toggle("ron97"))
         self.diesel_var.trace_add("write", lambda *_: self._on_fuel_toggle("diesel"))
+        self.subsidized_var.trace_add("write", lambda *_: self._on_subsidy_toggle())
 
     # --- UI BUILDING ---
     def _build_ui(self):
@@ -275,6 +276,16 @@ class FuelCalcApp:
     def _on_region_toggle(self):
         """Handle region toggle: sync market rate (diesel price changes by region)."""
         self._sync_market_rate()
+
+    def _on_subsidy_toggle(self):
+        """Swap market rate field between BUDI rate and actual market rate."""
+        if self._resetting:
+            return
+        if self.subsidized_var.get():
+            self.entries["market_price"].delete(0, "end")
+            self.entries["market_price"].insert(0, f"{self.budi_rate:.2f}")
+        else:
+            self._sync_market_rate()  # Restore market rate for selected fuel
 
     def _get_float(self, key: str) -> float | None:
         """Return float value of an entry or None if empty/invalid."""
