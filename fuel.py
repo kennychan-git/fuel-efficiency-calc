@@ -11,20 +11,21 @@ except ImportError:
 
 # --- CONSTANTS ---
 MPG_TO_L100KM = 235.215
-BUDI_RATE = 1.99
+FALLBACK_BUDI_RATE = 1.99
 KM_TO_MILES = 1.60934
 L_TO_GALLONS = 0.264172
 FALLBACK_PRICE_95 = "3.27"
 FALLBACK_PRICE_97 = "4.55"
 FALLBACK_PRICE_DIESEL = "2.35"
+FALLBACK_BUDI_RATE = 1.99
 # Returns the single most recent weekly record, sorted descending by date
 API_URL = "https://api.data.gov.my/data-catalogue?id=fuelprice&limit=1&sort=-date"
 
 
 # --- PRICE FETCHING ---
-def fetch_fuel_prices() -> tuple[str, str, str]:
-    """Fetch latest RON95, RON97, and diesel prices from data.gov.my.
-    Returns fallback strings on any failure."""
+def fetch_fuel_prices() -> tuple[str, str, str, float]:
+    """Fetch latest RON95, RON97, diesel prices and BUDI95 rate from data.gov.my.
+    Returns fallback values on any failure."""
     try:
         response = requests.get(API_URL, timeout=5)
         response.raise_for_status()
@@ -32,12 +33,13 @@ def fetch_fuel_prices() -> tuple[str, str, str]:
 
         if not data:
             print("[WARN] data.gov.my returned empty response, using fallback.")
-            return (FALLBACK_PRICE_95, FALLBACK_PRICE_97, FALLBACK_PRICE_DIESEL)
+            return (FALLBACK_PRICE_95, FALLBACK_PRICE_97, FALLBACK_PRICE_DIESEL, FALLBACK_BUDI_RATE)
 
         latest = data[0]
         price95 = f"{latest['ron95']:.2f}" if "ron95" in latest else None
         price97 = f"{latest['ron97']:.2f}" if "ron97" in latest else None
         price_diesel = f"{latest['diesel']:.2f}" if "diesel" in latest else None
+        budi_rate = float(latest["ron95_budi95"]) if "ron95_budi95" in latest else None
 
         if not price95:
             print("[WARN] RON95 field missing in API response, using fallback.")
@@ -45,6 +47,8 @@ def fetch_fuel_prices() -> tuple[str, str, str]:
             print("[WARN] RON97 field missing in API response, using fallback.")
         if not price_diesel:
             print("[WARN] Diesel field missing in API response, using fallback.")
+        if budi_rate is None:
+            print("[WARN] ron95_budi95 field missing in API response, using fallback.")
 
         effective_date = latest.get("date", "")
         if effective_date:
@@ -54,18 +58,19 @@ def fetch_fuel_prices() -> tuple[str, str, str]:
             price95 or FALLBACK_PRICE_95,
             price97 or FALLBACK_PRICE_97,
             price_diesel or FALLBACK_PRICE_DIESEL,
+            budi_rate if budi_rate is not None else FALLBACK_BUDI_RATE,
         )
 
     except (requests.RequestException, KeyError, ValueError, IndexError) as e:
         print(f"[WARN] Fuel price fetch failed: {e}")
 
-    return (FALLBACK_PRICE_95, FALLBACK_PRICE_97, FALLBACK_PRICE_DIESEL)
+    return (FALLBACK_PRICE_95, FALLBACK_PRICE_97, FALLBACK_PRICE_DIESEL, FALLBACK_BUDI_RATE)
 
 
 def load_prices_async():
     """Fetch all fuel prices in background, then update UI safely."""
-    price95, price97, price_diesel = fetch_fuel_prices()
-    root.after(0, lambda: app.update_fuel_prices(price95, price97, price_diesel))
+    price95, price97, price_diesel, budi_rate = fetch_fuel_prices()
+    root.after(0, lambda: app.update_fuel_prices(price95, price97, price_diesel, budi_rate))
 
 
 # --- APP CLASS ---
@@ -88,6 +93,7 @@ class FuelCalcApp:
         self.price_ron95: str = FALLBACK_PRICE_95
         self.price_ron97: str = FALLBACK_PRICE_97
         self.price_diesel: str = FALLBACK_PRICE_DIESEL
+        self.budi_rate: float = FALLBACK_BUDI_RATE
 
         self.subsidized_var = tk.BooleanVar(value=False)
         self.ron97_var = tk.BooleanVar(value=False)
@@ -142,7 +148,7 @@ class FuelCalcApp:
         # BUDI95 subsidy checkbox (RON95 only)
         self.subsidy_check = ttk.Checkbutton(
             main,
-            text="Eligible for BUDI95 (RM1.99 rate)",
+            text="Eligible for BUDI95 subsidised rate",
             variable=self.subsidized_var,
         )
         self.subsidy_check.grid(row=7, columnspan=2, pady=(2, 10))
@@ -172,11 +178,12 @@ class FuelCalcApp:
         ttk.Button(btn_frame, text="Quit", command=self.root.destroy).pack(side="left", padx=5)
 
     # --- HELPERS ---
-    def update_fuel_prices(self, price95: str, price97: str, price_diesel: str):
+    def update_fuel_prices(self, price95: str, price97: str, price_diesel: str, budi_rate: float):
         """Called from async thread to safely update UI with fetched prices."""
         self.price_ron95 = price95
         self.price_ron97 = price97
         self.price_diesel = price_diesel
+        self.budi_rate = budi_rate
         self.header_label.config(
             text=f"RON95: RM{price95}  |  RON97: RM{price97}  |  Diesel: RM{price_diesel}"
         )
@@ -326,7 +333,7 @@ class FuelCalcApp:
         # --- Subsidy logic (RON95 only) ---
         fuel = self._active_fuel()
         if fuel == "ron95" and self.subsidized_var.get():
-            actual_paid = liters * BUDI_RATE
+            actual_paid = liters * self.budi_rate
             savings = pump_market_value - actual_paid
         else:
             actual_paid = pump_market_value
