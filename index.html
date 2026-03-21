@@ -13,16 +13,19 @@
         label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 3px; color: #555; }
         input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 1rem; transition: 0.2s; }
         input:focus { border-color: var(--accent); outline: none; background: #f0f7ff; }
-        .fuel-types { display: flex; justify-content: space-around; margin: 15px 0; padding: 10px; border: 1px solid #eee; border-radius: 8px; background: #fafafa; }
+        .toggle-row { display: flex; justify-content: space-around; margin: 15px 0; padding: 10px; border: 1px solid #eee; border-radius: 8px; background: #fafafa; }
+        .toggle-row label { font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px; cursor: pointer; color: #333; }
+        .toggle-row input[type="radio"] { width: auto; margin: 0; cursor: pointer; }
+        .region-row { background: #f0f4ff; border-color: #c5cae9; }
         .subsidy-group { margin: 10px 0; background: #e8f5e9; padding: 12px; border-radius: 8px; border: 1px solid #c8e6c9; }
         button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1rem; margin-top: 10px; }
         .btn-reset { background: #757575; margin-top: 8px; }
-        
+
         /* Results Section */
         .results { margin-top: 20px; border-top: 2px solid #eee; padding-top: 15px; display: none; }
         .result-item { margin-bottom: 6px; font-size: 0.95rem; display: flex; justify-content: space-between; }
         .important { font-size: 1.1rem; font-weight: bold; color: var(--primary); border-bottom: 1px dashed #ddd; padding-bottom: 4px; }
-        
+
         /* Efficiency Gauge */
         .gauge-container { margin-top: 15px; background: #eee; height: 10px; border-radius: 5px; overflow: hidden; position: relative; }
         .gauge-bar { height: 100%; width: 0%; transition: width 0.5s ease-in-out; }
@@ -33,22 +36,30 @@
 
 <div class="container">
     <div id="header" class="header">Connecting to data.gov.my...</div>
-    
+
     <div id="financial_inputs">
         <div class="input-group">
             <label>Current Market Rate (RM/L):</label>
             <input type="number" id="market_price" step="0.01">
         </div>
 
-        <div class="fuel-types">
+        <!-- Fuel Type -->
+        <div class="toggle-row">
             <label><input type="radio" name="fuel" value="ron95" checked onchange="onFuelToggle()"> RON95</label>
             <label><input type="radio" name="fuel" value="ron97" onchange="onFuelToggle()"> RON97</label>
             <label><input type="radio" name="fuel" value="diesel" onchange="onFuelToggle()"> Diesel</label>
         </div>
 
+        <!-- Region -->
+        <div class="toggle-row region-row">
+            <label><input type="radio" name="region" value="wm" checked onchange="onRegionToggle()"> 🌏 West Malaysia</label>
+            <label><input type="radio" name="region" value="em" onchange="onRegionToggle()"> 🌏 East Malaysia</label>
+        </div>
+
+        <!-- BUDI95 Subsidy (RON95 + West Malaysia only) -->
         <div class="subsidy-group" id="subsidy_container">
             <label style="display:flex; align-items:center; cursor:pointer; font-size: 0.85rem;">
-                <input type="checkbox" id="subsidized_var" style="width:auto; margin-right:10px;"> Eligible for BUDI95 (RM1.99 rate)
+                <input type="checkbox" id="subsidized_var" style="width:auto; margin-right:10px;"> Eligible for BUDI95 subsidised rate
             </label>
         </div>
     </div>
@@ -82,7 +93,7 @@
         <div class="result-item important"><span>Efficiency:</span> <span id="res_km_l"></span></div>
         <div class="result-item"><span>L/100 km:</span> <span id="res_l100"></span></div>
         <div class="result-item"><span>Converted MPG:</span> <span id="res_mpg"></span></div>
-        
+
         <label style="margin-top:10px; display:block; text-align:center;">Consumption Rating (L/100km)</label>
         <div class="gauge-container">
             <div id="gauge" class="gauge-bar"></div>
