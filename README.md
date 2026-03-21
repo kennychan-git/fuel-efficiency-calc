@@ -1,52 +1,37 @@
-# ⛽ BUDI95 Trip & MPG Calculator
+# ⛽ BUDI95 Trip & Efficiency Calculator (MY)
 
-A precision fuel efficiency and subsidy calculator designed for Malaysian motorists. This tool helps you calculate trip costs, fuel economy (km/L, L/100km, MPG), and potential savings under the **BUDI95** subsidy program.
+A precision web-based utility for Malaysian motorists to calculate fuel economy, trip costs, and subsidy savings.
 
 **🚀 [Live Demo](https://kennychan-git.github.io/fuel-efficiency-calc/)**
 
 ---
 
-## 🌟 Key Features
+## 🌟 Latest Features
 
-* **Live Fuel Rates:** Automatically fetches the latest RON95, RON97, and Diesel prices from the [data.gov.my](https://data.gov.my) API.
-* **BUDI95 Subsidy Logic:** Calculate actual out-of-pocket costs and total savings when using the RM1.99 targeted subsidy rate.
-* **Dual-Mode Calculation:**
-    * **Trip Mode:** Input distance and fuel amount (RM or Liters) to see trip costs and efficiency.
-    * **Conversion Mode:** Input MPG to instantly get metric equivalents (L/100km, km/L) without financial fluff.
-* **Efficiency Gauge:** Visual color-coded feedback based on your vehicle's consumption.
-* **Mobile Responsive:** Designed to be used on-the-go at the petrol station.
+* **🇲🇾 Regional Pricing:** Toggle between **West Malaysia** and **East Malaysia** to automatically adjust for regional diesel price variances.
+* **📡 Live API Integration:** Fetches real-time prices for RON95, RON97, and Diesel directly from [data.gov.my](https://data.gov.my).
+* **💰 Dynamic Subsidy Logic:** * Automatically updates the **BUDI95** rate from the API.
+    * Calculates "Actual Paid" vs "Pump Value" to show your total savings.
+* **🔄 Unit Conversion Mode:** Toggle to "MPG Mode" for instant conversion to Metric (L/100km & km/L) without financial calculations.
+* **🚦 Efficiency Gauge:** Instant visual feedback (Green/Yellow/Red) based on your vehicle's L/100km performance.
+* **🛡️ Reliability:** Built-in "Amber" fallback mode ensures the tool works even if the government API is temporarily offline.
 
-## 📊 Logic & Constants
+## 🛠️ Technical Implementation
 
-The calculator uses the following proven conversion logic:
-* **MPG to L/100km:** $235.215 / MPG$
-* **Distance:** $KM / 1.60934$ to Miles
-* **Volume:** $Liters * 0.264172$ to Gallons
-* **Subsidized Rate:** Hardcoded to **RM 1.99/L** per BUDI95 guidelines.
+The app logic is strictly mirrored from a proven Python/Tkinter core:
+- **Constants:** $MPG\_TO\_L100KM = 235.215$, $KM\_TO\_MILES = 1.60934$.
+- **Prioritization:** The script prioritizes **MPG input** for unit conversion; otherwise, it calculates based on **Distance + (Liters or RM)**.
+- **Tech Stack:** Vanilla JavaScript (ES6+), HTML5, CSS3. No heavy frameworks, ensuring fast loading on mobile data.
 
-## 🛠️ Tech Stack
+## 📂 Files
 
-* **Frontend:** HTML5, CSS3, Vanilla JavaScript (ES6+).
-* **API:** [Data.gov.my Fuel Price API](https://developer.data.gov.my/).
-* **Deployment:** GitHub Pages.
-* *Original logic ported from a Python/Tkinter desktop application.*
-
-## 📂 Project Structure
-
-* `index.html`: The UI structure and responsive styling.
-* `script.js`: Core logic, API handling, and DOM manipulation.
-* `fuel_efficiency_calc.py`: The original Python/Tkinter version (Legacy).
-
-## 🚀 How to Use Locally
-
-If you wish to run the web version locally:
-1. Clone the repository.
-2. Open `index.html` in any modern web browser.
-3. (Optional) Run the Python version: `python fuel_efficiency_calc.py` (requires `ttkthemes`).
+* `index.html`: Responsive UI with region and fuel toggles.
+* `script.js`: Core engine handling API fetching, regional logic, and math.
+* `fuel_efficiency_calc.py`: The original desktop version of the tool.
 
 ## ⚖️ License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - free to use and modify.
 
 ---
 *Maintained by [kennychan-git](https://github.com/kennychan-git)*
