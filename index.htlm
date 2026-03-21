@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fuel Efficiency Calculator</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; padding: 20px; background-color: #f4f4f9; }
+        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h2 { color: #333; margin-top: 0; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        .result { margin-top: 20px; padding: 15px; background: #e7f3ff; border-radius: 6px; display: none; }
+        .val { font-weight: bold; color: #007bff; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Fuel Efficiency</h2>
+    
+    <div class="input-group">
+        <label>Distance Traveled (km)</label>
+        <input type="number" id="distance" placeholder="e.g. 450" oninput="calculate()">
+    </div>
+
+    <div class="input-group">
+        <label>Fuel Consumed (Liters)</label>
+        <input type="number" id="fuel" placeholder="e.g. 35" oninput="calculate()">
+    </div>
+
+    <div id="resultBox" class="result">
+        <div>Efficiency: <span id="kmL" class="val">0</span> km/L</div>
+        <div>Consumption: <span id="L100" class="val">0</span> L/100km</div>
+    </div>
+</div>
+
+<script>
+    function calculate() {
+        const dist = document.getElementById('distance').value;
+        const fuel = document.getElementById('fuel').value;
+        const resultBox = document.getElementById('resultBox');
+
+        if (dist > 0 && fuel > 0) {
+            const kmL = (dist / fuel).toFixed(2);
+            const l100 = ((fuel / dist) * 100).toFixed(2);
+            
+            document.getElementById('kmL').innerText = kmL;
+            document.getElementById('L100').innerText = l100;
+            resultBox.style.display = 'block';
+        } else {
+            resultBox.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>
